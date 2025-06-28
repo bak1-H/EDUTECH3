@@ -27,4 +27,4 @@ public class TipoUsuarioClient {
             return new TipoUsuarioDto(id, "DESCONOCIDO", "Error", "{}", false);
         }
     }
-}
+}   
