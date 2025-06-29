@@ -16,7 +16,6 @@ public class PagoService {
 
     @Autowired
     private PagoRepository pagoRepository;
-    private ModuleRemapper moduleRemapper;
 
     public List<Pago> obtenerTodos() {
         return pagoRepository.findAll();

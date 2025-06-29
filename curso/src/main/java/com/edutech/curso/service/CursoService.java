@@ -32,6 +32,15 @@ public class CursoService {
         cursoRepository.deleteById(id);
     }
 
+    public void actualizarCurso(Long id, Curso curso) {
+        if (cursoRepository.existsById(id)) {
+            curso.setId(id);
+            cursoRepository.save(curso);
+        } else {
+            throw new RuntimeException("Curso no encontrado con ID: " + id);
+        }
+    }
+    
 }
 
 

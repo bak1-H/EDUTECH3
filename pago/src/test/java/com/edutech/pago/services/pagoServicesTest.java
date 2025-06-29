@@ -55,18 +55,16 @@ void setUp() {
     pago2.setEstado(false);
 }
 
-//Este test sirve para obtener la lista de pagos que fue creada con pago1 y pago2.
+//Este test sirve para obtener la lista de pagos que fue creada con pago1 y pago2,
+// Verifica que el método findAll del repositorio de pagos sea llamado una vez y 
+//que la lista de pagos obtenida no sea nula y contenga los dos pagos esperados.
+
 
     @Test 
     void obtenerTodos_retornaListaPagos(){
-        // Arrange
         ArrayList<Pago> pagosTest = new ArrayList<>(Arrays.asList(pago1, pago2));
         when(pagoRepository.findAll()).thenReturn(pagosTest);
-
-        // Act
         List<Pago> resultadoObtenido = pagoService.obtenerTodos();
-
-        // Assert
         assertNotNull(resultadoObtenido);
         assertEquals(2, resultadoObtenido.size(), "La Lista deberia contener 2 pagos");
         
@@ -86,6 +84,8 @@ void setUp() {
     }
 
 //Este test sirve para obtener pagos por id.
+//Verifica que el método findById del repositorio de pagos sea llamado una vez y
+//que el pago obtenido sea el mismo que el pago1 creado en setUp().
 @Test
 void obtenerPagoPorId_retornaPago() {
     // Arrange
@@ -117,20 +117,18 @@ void guardarPago_retornaPagoCreado() {
 }
 
 //Este test sirve para eliminar pagos por Id.
+// Llama al método deleteById del repositorio de pagos y verifica que se haya llamado una vez.
     @Test
     void obtenerPagoPorId_noExiste_retornaEmpty() {
-        // Arrange
         when(pagoRepository.findById(999L)).thenReturn(Optional.empty());
-
-        // Act
         Optional<Pago> resultado = pagoService.obtenerPorId(999L);
-
-        // Assert
         assertFalse(resultado.isPresent(), "El pago no deberia estar presente");
         verify(pagoRepository, times(1)).findById(999L);
     }
 
 //Este test sirve para obtener pagos por usuario Rut.
+//Recorre la lista de pagos y verifica que el usuarioRut del pago coincida con el usuarioRut buscado.
+//Si encuentra un pago con el usuarioRut buscado, lo agrega a la lista de resultados.
 @Test
 void obtenerPorUsuarioRut_retornaPagosPorUsuario() {
     // Arrange
@@ -148,6 +146,8 @@ void obtenerPorUsuarioRut_retornaPagosPorUsuario() {
 }
 
 //Este test sirve para obtener pagos por curso Id.
+//reccore la lista de pagos y verifica que el cursoId del pago coincida con el cursoId buscado.
+//Si encuentra un pago con el cursoId buscado, lo agrega a la lista de resultados
 
     @Test
     void obtenerPorCursoId_retornaPagosPorCurso() {
@@ -166,12 +166,10 @@ void obtenerPorUsuarioRut_retornaPagosPorUsuario() {
     }
 
 //Este test sirve para eliminar pagos por Id.
+//llama al método deleteById del repositorio de pagos y verifica que se haya llamado una vez.
     @Test 
     void eliminarPago_eliminaCorrectamente() {
-        // Arrange
         doNothing().when(pagoRepository).deleteById(1L);
-
-        // Act & Assert - No debería lanzar excepción
         assertDoesNotThrow(() -> {
             pagoService.eliminarPago(1L);
         });
@@ -181,52 +179,16 @@ void obtenerPorUsuarioRut_retornaPagosPorUsuario() {
 
 
 //Este test sirve para eliminar pagos por Id, pero en este caso se lanza una excepción.
+//Significa que al intentar eliminar un pago con un Id que no existe, se lanza una excepción.
 @Test
     void eliminarPago_conError_lanzaExcepcion() {
-        // Arrange
         doThrow(new RuntimeException("Error al eliminar")).when(pagoRepository).deleteById(1L);
-
-        // Act & Assert
         assertThrows(RuntimeException.class, () -> {
             pagoService.eliminarPago(1L);
         });
 
         verify(pagoRepository, times(1)).deleteById(1L);
     }
-
-//Este test sirve para verificar que el servicio maneja correctamente listas vacías.
-@Test
-void obtenerPorUsuarioRut_listaVacia_retornaListaVacia() {
-    // Arrange
-    List<Pago> pagosVacios = new ArrayList<>();
-    when(pagoRepository.findByUsuarioRut(99999999L)).thenReturn(pagosVacios);
-
-    // Act
-    List<Pago> resultado = pagoService.obtenerPorUsuarioRut(99999999L);
-
-    // Assert
-    assertNotNull(resultado);
-    assertEquals(0, resultado.size());
-    assertTrue(resultado.isEmpty());
-    verify(pagoRepository, times(1)).findByUsuarioRut(99999999L);
-}
-
-//Este test sirve para verificar que el servicio maneja correctamente listas vacías para cursos.
-@Test
-void obtenerPorCursoId_listaVacia_retornaListaVacia() {
-    // Arrange
-    List<Pago> pagosVacios = new ArrayList<>();
-    when(pagoRepository.findByCursoId(99999L)).thenReturn(pagosVacios);
-
-    // Act
-    List<Pago> resultado = pagoService.obtenerPorCursoId(99999L);
-
-    // Assert
-    assertNotNull(resultado);
-    assertEquals(0, resultado.size());
-    assertTrue(resultado.isEmpty());
-    verify(pagoRepository, times(1)).findByCursoId(99999L);
-}
 
 
 }

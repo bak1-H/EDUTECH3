@@ -1,7 +1,7 @@
 package com.edutech.sistema.controller;
 
-import com.edutech.sistema.model.controller.SistemaController;
 import com.edutech.sistema.model.Pago;
+import com.edutech.sistema.controller.SistemaController;
 import com.edutech.sistema.model.Curso;
 import com.edutech.sistema.model.Usuario;
 import com.edutech.sistema.service.PagoService;
@@ -61,7 +61,7 @@ class SistemaControllerTest {
         cursoEjemplo.setNombreCurso("Curso de Java");
         cursoEjemplo.setDescripcionCurso("Curso completo de Java");
 
-        // Usuario: solo rut y nombre (NO tiene email)
+        // Usuario: solo rut y nombre
         usuarioEjemplo = new Usuario();
         usuarioEjemplo.setRut("12345678-9");
         usuarioEjemplo.setNombre("Juan Pérez");
@@ -140,11 +140,8 @@ class SistemaControllerTest {
 
     @Test
     void testGetAllCursos_Exitoso() throws Exception {
-        // Arrange
         List<Curso> cursos = Arrays.asList(cursoEjemplo);
         when(cursoService.obtenerTodosLosCursos()).thenReturn(cursos);
-
-        // Act & Assert - Campos correctos de Curso
         mockMvc.perform(get("/api/sistema/cursos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
@@ -173,18 +170,15 @@ class SistemaControllerTest {
     }
 
     // Pruebas para manejar casos donde no se encuentra un pago por Id
-    // Verifica que el controlador retorne un estado 200 OK cuando no se encuentra un
-    //Sin el pago ID no se puede obtener informacion relacionada al pago.
-
+    // Verifica que el controlador retorne un estado 200 OK cuando no se encuentra un pago por ID.
     @Test
     void testGetPago_NoEncontrado() throws Exception {
-        // Arrange
         Long pagoId = 999L;
         when(pagoService.obtenerPagoPorId(pagoId)).thenReturn(null);
-
-        // Act & Assert
         mockMvc.perform(get("/api/sistema/pagos/{id}", pagoId))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                //Aqui da un mensaje de que no se encontró el pago
+                .andExpect(content().string("Verificacion Exitoso: No existe un pago con el ID proporcionado"));
 
         verify(pagoService, times(1)).obtenerPagoPorId(pagoId);
     }
@@ -193,10 +187,7 @@ class SistemaControllerTest {
     // Verifica que el controlador retorne un estado 200 OK y una lista vacía
     @Test
     void testGetAllPagos_ListaVacia() throws Exception {
-        // Arrange
         when(pagoService.obtenerTodosLosPagos()).thenReturn(Arrays.asList());
-
-        // Act & Assert
         mockMvc.perform(get("/api/sistema/pagos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())

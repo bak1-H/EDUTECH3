@@ -15,12 +15,12 @@ public class PagoService {
     private RestTemplate restTemplate;
 
     public Pago obtenerPagoPorId(Long id) {
-        String url = "http://localhost/api/pagos/" + id;
+        String url = "http://localhost:8081/api/pagos/" + id;
         return restTemplate.getForObject(url, Pago.class);
     }
 
     public List<Pago> obtenerTodosLosPagos() {
-        String url = "http://localhost/api/pagos";
+        String url = "http://localhost:8081/api/pagos";
         Pago[] pagosArray = restTemplate.getForObject(url, Pago[].class);
         return pagosArray != null ? Arrays.asList(pagosArray) : new ArrayList<>();
     }

@@ -1,4 +1,4 @@
-package com.edutech.sistema.model.controller;
+package com.edutech.sistema.controller;
 import com.edutech.sistema.model.Pago;
 import com.edutech.sistema.model.Curso;
 import com.edutech.sistema.model.Usuario;

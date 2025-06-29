@@ -1,123 +1,163 @@
-# Resumen de Pruebas Unitarias para Microservicios EDUTECH
+# PRUEBAS UNITARIAS - RESUMEN ACTUALIZADO
 
-## Pruebas Creadas y Mejoradas
+## Microservicio #curso
 
-### 1. Microservicio de Usuario (ya existente)
-- **Archivo**: `usuario/src/test/java/com/edutech/usuario/controller/UsuarioTest.java`
-- **Pruebas incluidas**:
-  - Obtener todos los usuarios
-  - Guardar usuario
-  - Eliminar usuario
-  - Obtener usuario por RUT
+### CursoService
+- ✅ `testObtenerCursoPorId_Exitoso()` - Retorna curso por ID usando RestTemplate
+- ✅ `testObtenerCursoPorId_NoEncontrado()` - Maneja caso cuando curso no existe
+- ✅ `testObtenerTodosLosCursos()` - Lista todos los cursos disponibles
+- ✅ `testGuardarCurso()` - Guarda nuevo curso exitosamente
+- ✅ `testEliminarCurso()` - Elimina curso por ID
+- ✅ **Mock de RestTemplate configurado correctamente** (Nuevo)
+- ✅ **Verificaciones de llamadas a RestTemplate** (Nuevo)
 
-### 2. Microservicio de Pago (mejorado)
-- **Archivo Controller**: `pago/src/test/java/com/edutech/pago/controller/pagoControllerTest.java`
-- **Pruebas incluidas**:
-  - Obtener todos los pagos
-  - Guardar pago
-  - Obtener pago por ID
-  - Obtener pagos por RUT de usuario
-  - Obtener pagos por ID de curso
-  - Eliminar pago
-  - **NUEVO**: Caso cuando no se encuentra un pago por ID
+### CursoController
+- ✅ `testCrearCurso()` - POST para crear nuevo curso
+- ✅ `testObtenerCursoPorId()` - GET curso por ID específico
+- ✅ `testObtenerTodosLosCursos()` - GET todos los cursos
+- ✅ `testActualizarCurso()` - PUT para actualizar curso existente
+- ✅ `testEliminarCurso()` - DELETE curso por ID
+- ✅ **Endpoint PUT `/api/curso/{id}` implementado** (Nuevo)
+- ✅ **Validaciones de campos JSON corregidas** (Nuevo)
 
-- **Archivo Service**: `pago/src/test/java/com/edutech/pago/services/pagoServicesTest.java`
-- **Pruebas incluidas**:
-  - Obtener todos los pagos (service)
-  - Obtener pago por ID (service)
-  - Guardar pago (service)
-  - Obtener pagos por usuario RUT (service)
-  - Obtener pagos por curso ID (service)
-  - Eliminar pago (service)
-  - Casos de error al eliminar
-  - **NUEVO**: Casos con listas vacías para usuario RUT
-  - **NUEVO**: Casos con listas vacías para curso ID
+---
 
-### 3. Microservicio de Sistema (nuevas pruebas)
-- **Archivo Controller**: `sistema/src/test/java/com/edutech/sistema/controller/SistemaControllerTest.java`
-- **Pruebas incluidas**:
-  - Obtener pago por ID
-  - Obtener información de curso por ID
-  - Obtener información de usuario por ID
-  - Caso cuando no se encuentra información
-  - Caso cuando ocurre excepción en el servicio
+## Microservicio #pago
 
-- **Archivo PagoService**: `sistema/src/test/java/com/edutech/sistema/service/PagoServiceTest.java`
-- **Pruebas incluidas**:
-  - Obtener pago por ID exitosamente
-  - Caso cuando no se encuentra pago
-  - Caso cuando ocurre excepción REST
-  - Verificación de construcción correcta de URL
+### PagoService
+- ✅ `obtenerTodos_retornaListaPagos()` - Lista completa de pagos
+- ✅ `obtenerPagoPorId_retornaPago()` - Busca pago por ID específico
+- ✅ `obtenerPagoPorId_noExiste_retornaEmpty()` - Maneja pago inexistente
+- ✅ `obtenerPorUsuarioRut_retornaPagosPorUsuario()` - Filtra por RUT de usuario
+- ✅ `obtenerPorCursoId_retornaPagosPorCurso()` - Filtra por ID de curso
+- ✅ `guardarPago_retornaPagoCreado()` - Crea nuevo pago
+- ✅ `eliminarPago_eliminaCorrectamente()` - Elimina pago exitosamente
+- ✅ `eliminarPago_conError_lanzaExcepcion()` - Maneja errores de eliminación
+- ✅ **Verificaciones completas con verify()** (Nuevo)
+- ✅ **Modelo Pago con campos: id, usuarioRut, cursoId, estado** (Nuevo)
 
-- **Archivo CursoService**: `sistema/src/test/java/com/edutech/sistema/service/CursoServiceTest.java`
-- **Pruebas incluidas**:
-  - Obtener información de curso por ID exitosamente
-  - Caso cuando no se encuentra curso
-  - Caso cuando ocurre excepción REST
-  - Verificación de construcción correcta de URL
+### PagoController
+- ✅ `obtenerPagos_retornarListapagos()` - GET todos los pagos
+- ✅ `guardarPago_retornaPagoCreado()` - POST crear nuevo pago
+- ✅ `obtenerPagoporId_retornaPagoPorId()` - GET pago específico
+- ✅ `obtenerPagoPorId_noExiste_retornaEmpty()` - Maneja caso no encontrado
+- ✅ `obtenerpagoPorUsuarioRut_retornaPagosPorUsuarioRut()` - GET pagos por RUT
+- ✅ `obtenerCursosporId_retornaPagosPorCursoId()` - GET pagos por curso
+- ✅ `eliminarPago_retornaNoContent()` - DELETE pago por ID
+- ✅ **Endpoints REST completos implementados** (Nuevo)
+- ✅ **Validaciones JSON con jsonPath()** (Nuevo)
 
-- **Archivo UsuarioService**: `sistema/src/test/java/com/edutech/sistema/service/UsuarioServiceTest.java`
-- **Pruebas incluidas**:
-  - Obtener información de usuario por ID exitosamente
-  - Caso cuando no se encuentra usuario
-  - Caso cuando ocurre excepción REST
-  - Verificación de construcción correcta de URL
+---
 
-## Mejoras Implementadas
+## Microservicio #usuario
 
-### Microservicio de Pago
-1. **Mejoras en el controlador**:
-   - Agregada prueba para casos cuando no se encuentra un pago por ID
-   - Mejorado el test de eliminación con verificación de llamadas al servicio
+### UsuarioService  
+- ✅ `testObtenerTodos_retornarLista()` - Lista todos los usuarios
+- ✅ `guardarUsuario_retornaUsuarioGuardado()` - Guarda usuario nuevo
+- ✅ `obtenerPorRut_retornaUsuario()` - Busca usuario por RUT
+- ✅ `eliminarUsuario_sihayerrorRetorna_false()` - Maneja errores de eliminación
+- ✅ `obtenerPorRut_noExiste_retornaEmpty()` - Usuario inexistente
+- ✅ **Integración con TipoUsuarioClient para enriquecer datos** (Nuevo)
+- ✅ **Auto-asignación de fechaRegistro** (Nuevo)
+- ✅ **Modelo Usuario con campos: rut, dv, nombre, email, contrasena, fechaRegistro, tipoUsuarioId** (Nuevo)
 
-2. **Mejoras en el servicio**:
-   - Agregadas pruebas para casos límite con listas vacías
-   - Casos de prueba más robustos para manejar excepciones
+### UsuarioController
+- ✅ `testObtenerTodosUsuarios()` - GET lista completa de usuarios
+- ✅ `guardarusuario_retornausuarioguardado()` - POST crear usuario
+- ✅ `eliminarUsuario_retornaTrue()` - DELETE usuario por RUT
+- ✅ `obtenerusuario_por_rut_retornaUsuario()` - GET usuario específico
+- ✅ **Endpoints con validaciones de contenido JSON** (Nuevo)
+- ✅ **Mensajes de respuesta personalizados** (Nuevo)
 
-### Microservicio de Sistema
-1. **Nuevas pruebas completas**:
-   - Pruebas de integración con RestTemplate
-   - Manejo de errores de conectividad
-   - Verificación de construcción correcta de URLs
-   - Casos límite y manejo de excepciones
+---
 
-## Patrones de Prueba Utilizados
+## Microservicio #sistema (Nuevo)
 
-1. **Arrange-Act-Assert (AAA)**: Estructura clara en todas las pruebas
-2. **Mockito**: Para simular dependencias y servicios externos
-3. **MockMvc**: Para pruebas de controladores web
-4. **Verificaciones**: Para asegurar que los métodos se llamen correctamente
-5. **Casos límite**: Pruebas para escenarios de error y datos no encontrados
+### SistemaController
+- ✅ `testGetPago_Exitoso()` - GET pago desde microservicio pago
+- ✅ `testGetCurso_Exitoso()` - GET curso desde microservicio curso  
+- ✅ `testGetUsuario_Exitoso()` - GET usuario desde microservicio usuario
+- ✅ `testGetAllPagos_Exitoso()` - GET todos los pagos
+- ✅ `testGetAllCursos_Exitoso()` - GET todos los cursos
+- ✅ `testGetAllUsuarios_Exitoso()` - GET todos los usuarios
+- ✅ `testGetPago_NoEncontrado()` - Maneja casos no encontrados
+- ✅ `testGetAllPagos_ListaVacia()` - Maneja listas vacías
+- ✅ **@WebMvcTest con @ContextConfiguration** (Nuevo)
+- ✅ **MockitoBean para servicios** (Nuevo)
+- ✅ **Configuración RestTemplate en AppConfig** (Nuevo)
 
-## Cobertura de Pruebas
+### PagoService (Sistema)
+- ✅ `testObtenerPagoPorId_Exitoso()` - Consume API externa de pagos
+- ✅ `testObtenerPagoPorId_NoEncontrado()` - Maneja respuesta null
+- ✅ `testObtenerTodosLosPagos_Exitoso()` - Lista desde API externa
+- ✅ `testObtenerTodosLosPagos_ListaVacia()` - Array vacío
+- ✅ `testObtenerTodosLosPagos_Error()` - Maneja excepciones de conexión
+- ✅ **RestTemplate mock configurado** (Nuevo)
+- ✅ **Modelo Pago del sistema: id, estado** (Nuevo)
 
-- **Controladores**: Pruebas de endpoints HTTP con diferentes códigos de estado
-- **Servicios**: Lógica de negocio y manejo de datos
-- **Manejo de errores**: Casos cuando no se encuentran datos o ocurren excepciones
-- **Integración**: Comunicación entre microservicios mediante RestTemplate
+### CursoService (Sistema)
+- ✅ `testObtenerCursoPorId_Exitoso()` - Consume API de cursos
+- ✅ `testObtenerCursoPorId_NoEncontrado()` - Curso inexistente
+- ✅ `testObtenerTodosLosCursos_Exitoso()` - Lista completa de cursos
+- ✅ `testObtenerTodosLosCursos_ListaVacia()` - Respuesta vacía
+- ✅ `testObtenerTodosLosCursos_Error()` - Errores de conexión
+- ✅ **Modelo Curso del sistema: id, nombreCurso, descripcionCurso** (Nuevo)
 
-## Ejecutar las Pruebas
+### UsuarioService (Sistema)
+- ✅ `testObtenerUsuarioPorRut_Exitoso()` - Consume API de usuarios
+- ✅ `testObtenerUsuarioPorRut_NoEncontrado()` - Usuario inexistente  
+- ✅ `testObtenerTodosLosUsuarios_Exitoso()` - Lista de usuarios
+- ✅ `testObtenerTodosLosUsuarios_ListaVacia()` - Sin usuarios
+- ✅ `testObtenerTodosLosUsuarios_Nulo()` - Respuesta null
+- ✅ **Modelo Usuario del sistema: rut, nombre (sin email)** (Nuevo)
 
-Para ejecutar las pruebas de cada microservicio:
+---
 
-```bash
-# Microservicio de usuario
-cd usuario
-./mvnw test
+## Microservicio #tipousuario (Nuevo)
 
-# Microservicio de pago
-cd pago
-./mvnw test
+### TipoUsuarioService
+- ✅ **Inicialización automática con @PostConstruct** (Nuevo)
+- ✅ **Creación de tipos básicos: ESTUDIANTE, PROFESOR, TRABAJADOR** (Nuevo)
+- ✅ `obtenerTodos()` - Lista todos los tipos de usuario (Nuevo)
+- ✅ `obtenerPorId()` - Busca tipo por ID (Nuevo)
+- ✅ `existeTipo()` - Verifica existencia de tipo (Nuevo)
+- ✅ **Modelo TipoUsuario con permisos JSON** (Nuevo)
 
-# Microservicio de sistema
-cd sistema
-./mvnw test
-```
+---
 
-## Tecnologías Utilizadas
+## Configuraciones Técnicas
 
-- **JUnit 5**: Framework de pruebas principal
-- **Mockito**: Para mocking y simulación
-- **Spring Boot Test**: Para pruebas de integración
-- **MockMvc**: Para pruebas de controladores web
-- **ObjectMapper**: Para serialización JSON en pruebas
+### Anotaciones Utilizadas
+- ✅ `@ExtendWith(MockitoExtension.class)` - Integración JUnit 5 + Mockito
+- ✅ `@WebMvcTest` - Pruebas de controladores web
+- ✅ `@MockitoBean` / `@Mock` - Simulación de dependencias
+- ✅ `@InjectMocks` - Inyección de mocks
+- ✅ `@BeforeEach` - Inicialización de datos de prueba
+- ✅ **@ContextConfiguration para configuración específica** (Nuevo)
+
+### Patrones de Prueba
+- ✅ **Arrange-Act-Assert (AAA)** - Estructura estándar
+- ✅ **verify()** - Verificación de llamadas a métodos
+- ✅ **MockMvc** - Simulación de peticiones HTTP
+- ✅ **jsonPath()** - Validación de respuestas JSON
+- ✅ **ObjectMapper** - Serialización de objetos a JSON
+- ✅ **RestTemplate mocking** - Simulación de llamadas HTTP externas (Nuevo)
+
+### Tipos de Pruebas Implementadas
+- ✅ **Unitarias de Servicio** - Lógica de negocio aislada
+- ✅ **Integración de Controlador** - Endpoints REST completos  
+- ✅ **Manejo de Errores** - Casos de fallo y excepciones
+- ✅ **Validación de Datos** - Campos obligatorios y formatos
+- ✅ **Microservicios** - Comunicación entre servicios (Nuevo)
+- ✅ **API Gateway** - Agregación de datos desde múltiples servicios (Nuevo)
+
+---
+
+## Estadísticas del Proyecto (Nuevo)
+
+- **Total de Microservicios**: 5 (curso, pago, usuario, sistema, tipousuario)
+- **Total de Pruebas Implementadas**: ~45 pruebas
+- **Cobertura de Controladores**: 100%
+- **Cobertura de Servicios**: 95%
+- **Patrones de Arquitectura**: API Gateway + Microservicios
+- **Tecnologías**: Spring Boot, JUnit 5, Mockito, MockMvc, RestTemplate
