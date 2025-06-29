@@ -29,12 +29,19 @@ public class UsuarioService {
     @Autowired
     private TipoUsuarioClient tipoUsuarioClient;
 
+
+
+    //Este metodo obtiene todos los usuarios del repositorio
+    // y enriquece cada usuario con su tipo de usuario correspondiente.
     public List<Usuario> obtenerTodos() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         usuarios.forEach(this::enriquecerConTipoUsuario);
         return usuarios;
     }
 
+
+    //Este metodo obtiene un usuario por su RUT
+    // y si el usuario existe, lo enriquece con su tipo de usuario.
     public Optional<Usuario> obtenerPorRut(Long rut) {
         Optional<Usuario> usuario = usuarioRepository.findById(rut);
         if (usuario.isPresent()) {
@@ -43,6 +50,10 @@ public class UsuarioService {
         return usuario;
     }
 
+
+    //Este metodo guarda un usuario en el repositorio
+    // Si la fecha de registro es nula, se asigna la fecha actual.
+    // Luego, se enriquece el usuario guardado con su tipo de usuario.
     public Usuario guardarUsuario(Usuario usuario) {
         if (usuario.getFechaRegistro() == null) {
             usuario.setFechaRegistro(new Timestamp(System.currentTimeMillis()));
@@ -57,6 +68,15 @@ public class UsuarioService {
         usuarioRepository.deleteById(rut);
     }
 
+
+
+
+    // Este método enriquece un usuario con su tipo de usuario.
+    // Utiliza el cliente TipoUsuarioClient para obtener el tipo de usuario
+    // correspondiente al ID del tipo de usuario del usuario.
+    // Si ocurre un error al obtener el tipo de usuario, se asigna un tipo de usuario
+    // de error con un mensaje indicando que no está disponible.
+    // Esto asegura que cada usuario tenga un tipo de usuario asociado, incluso si hay un error.
     private void enriquecerConTipoUsuario(Usuario usuario) {
         try {
             TipoUsuarioDto tipoUsuario = tipoUsuarioClient.obtenerTipoUsuario(usuario.getTipoUsuarioId());

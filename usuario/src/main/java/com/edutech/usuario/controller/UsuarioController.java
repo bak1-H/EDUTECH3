@@ -45,8 +45,8 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{rut}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long rut) {
+    public ResponseEntity<String> eliminarUsuario(@PathVariable Long rut) {
         usuarioService.eliminarUsuario(rut);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("El Usuario ha sido eliminado correctamente.");
     }
 }

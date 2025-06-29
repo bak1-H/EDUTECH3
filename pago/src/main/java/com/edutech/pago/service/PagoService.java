@@ -2,6 +2,9 @@ package com.edutech.pago.service;
 
 import com.edutech.pago.model.Pago;
 import com.edutech.pago.repository.PagoRepository;
+
+import aj.org.objectweb.asm.commons.ModuleRemapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +16,7 @@ public class PagoService {
 
     @Autowired
     private PagoRepository pagoRepository;
+    private ModuleRemapper moduleRemapper;
 
     public List<Pago> obtenerTodos() {
         return pagoRepository.findAll();
@@ -37,4 +41,5 @@ public class PagoService {
     public void eliminarPago(Long id) {
         pagoRepository.deleteById(id);
     }
+
 }

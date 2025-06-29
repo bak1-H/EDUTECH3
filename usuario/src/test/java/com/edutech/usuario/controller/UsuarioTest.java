@@ -122,7 +122,6 @@ public class UsuarioTest {
 
     @Test
     void eliminarUsuario_retornaTrue() throws Exception {
-
         //Simulamos que el servicio elimina el usuario sin errores
         //Cuando se llame al método obtenerPorRut del servicio, devolverá un Optional con el usuario1
         //Esto simula que el usuario existe y puede ser eliminado
@@ -135,9 +134,25 @@ public class UsuarioTest {
         //Esto simula que la eliminación se realiza correctamente0  
         mockMvc.perform(delete("/api/usuarios/{rut}", 12345678L))
         .andExpect(content().string("El Usuario ha sido eliminado correctamente.")); //Esperamos que el mensaje de éxito sea el correcto
-
-
-            
+     
     }
+
+    @Test 
+    void obtenerusuario_por_rut_retornaUsuario() throws Exception {
+        when(usuarioService.obtenerPorRut(12345678L)).thenReturn(java.util.Optional.of(usuario1)); //Simula el comportamiento del servicio al devolver el usuario con el RUT especificado
+        mockMvc.perform(get("/api/usuarios/{rut}", 12345678L)); //
+
+        mockMvc.perform(get("/api/usuarios/{rut}", 12345678L))
+                .andExpect(status().isOk()) //Esperamos un estado 200 OK
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)) //Esperamos que el contenido sea JSON
+                .andExpect(jsonPath("$.rut", is(12345678))) //Esperamos que el RUT del usuario sea 12345678
+                .andExpect(jsonPath("$.nombre", is("Juan"))); //Esperamos que el nombre del usuario sea "Juan"     
+    }
+
+
+    
+
+
+    
     
 }

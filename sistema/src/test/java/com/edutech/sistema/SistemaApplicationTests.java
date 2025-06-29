@@ -1,13 +1,19 @@
 package com.edutech.sistema;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
-@SpringBootTest
-class SistemaApplicationTests {
+@SpringBootApplication
+public class SistemaApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SistemaApplication.class, args);
+    }
 
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }
