@@ -9,10 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
-
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -22,102 +24,151 @@ import static org.mockito.Mockito.*;
 class CursoServiceTest {
 
     @Mock
-    private RestTemplate restTemplate;
+    private RestTemplate restTemplate; // Corregido: Mock del RestTemplate, no Repository
 
     @InjectMocks
     private CursoService cursoService;
 
-    private Curso cursoEjemplo;
+    private Curso curso;
+    private ResponseEntity<Curso> responseEntity;
+    private ResponseEntity<Curso[]> responseEntityArray;
 
     @BeforeEach
     void setUp() {
-        cursoEjemplo = new Curso();
-        cursoEjemplo.setId(1L);
-        cursoEjemplo.setNombreCurso("Curso de Java");
-        cursoEjemplo.setDescripcionCurso("Curso completo de Java");
+        curso = new Curso();
+        curso.setId(1L);
+        curso.setNombreCurso("Java Básico");
+        curso.setDescripcionCurso("Curso de Java para principiantes");
+
+        responseEntity = new ResponseEntity<>(curso, HttpStatus.OK);
     }
 
-
-    //Este test verifica que el método obtenerCursoPorId
-    //retorna un curso cuando se le pasa un ID válido.
-    // También verifica que el curso retornado tiene los valores esperados.
-    //El test utiliza Mockito para simular el comportamiento del RestTemplate,
-
     @Test
-    void testObtenerCursoPorId_Exitoso() {
+    void obtenerCursoPorId_Exitoso() {
+        // Arrange
         Long cursoId = 1L;
-        when(restTemplate.getForObject(anyString(), eq(Curso.class)))
-            .thenReturn(cursoEjemplo);
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
+            .thenReturn(responseEntity);
+        
+        // Act
         Curso resultado = cursoService.obtenerCursoPorId(cursoId);
+        
+        // Assert
         assertNotNull(resultado);
         assertEquals(1L, resultado.getId());
-        assertEquals("Curso de Java", resultado.getNombreCurso());
-        assertEquals("Curso completo de Java", resultado.getDescripcionCurso());
+        assertEquals("Java Básico", resultado.getNombreCurso());
+        assertEquals("Curso de Java para principiantes", resultado.getDescripcionCurso());
+        
+        verify(restTemplate, times(1)).getForEntity(
+            eq("http://localhost:8084/api/curso/" + cursoId), 
+            eq(Curso.class)
+        );
     }
 
-
-    // Este test verifica que el método obtenerCursoPorId
-    //lanza una excepción HttpClientErrorException cuando se intenta obtener un curso
-    //con un ID que no existe. Utiliza Mockito para simular el comportamiento del RestTemplate
-
     @Test
-    void testObtenerCursoPorId_NoEncontrado() {
+    void obtenerCursoPorId_NoEncontrado() {
+        // Arrange
         Long cursoId = 999L;
-        when(restTemplate.getForObject(anyString(), eq(Curso.class)))
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        assertThrows(HttpClientErrorException.class, () -> {
-            cursoService.obtenerCursoPorId(cursoId);
-        });
+        
+        // Act
+        Curso resultado = cursoService.obtenerCursoPorId(cursoId);
+        
+        // Assert
+        assertNull(resultado);
+        verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso.class));
     }
 
-    // Este test verifica que el método obtenerTodosLosCursos
-    //retorna una lista de cursos cuando se llama correctamente.
-    // También verifica que la lista contiene los cursos esperados.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
     @Test
-    void testObtenerTodosLosCursos_Exitoso() {
+    void obtenerCursoPorId_ErrorConexion() {
+        // Arrange
+        Long cursoId = 1L;
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
+            .thenThrow(new ResourceAccessException("Microservicio no disponible"));
+        
+        // Act
+        Curso resultado = cursoService.obtenerCursoPorId(cursoId);
+        
+        // Assert
+        assertNull(resultado);
+        verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso.class));
+    }
+
+    @Test
+    void obtenerTodosLosCursos_Exitoso() {
         // Arrange
         Curso curso2 = new Curso();
         curso2.setId(2L);
-        curso2.setNombreCurso("Curso de Python");
-        curso2.setDescripcionCurso("Curso de Python");
+        curso2.setNombreCurso("Python Básico");
+        curso2.setDescripcionCurso("Curso de Python para principiantes");
         
-        Curso[] cursosArray = {cursoEjemplo, curso2};
-        when(restTemplate.getForObject(anyString(), eq(Curso[].class)))
-            .thenReturn(cursosArray);
+        Curso[] cursosArray = {curso, curso2};
+        responseEntityArray = new ResponseEntity<>(cursosArray, HttpStatus.OK);
+        
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
+            .thenReturn(responseEntityArray);
+        
+        // Act
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
+        
+        // Assert
         assertNotNull(resultado);
         assertEquals(2, resultado.size());
-        assertEquals("Curso de Java", resultado.get(0).getNombreCurso());
-        assertEquals("Curso de Python", resultado.get(1).getDescripcionCurso());
+        assertEquals("Java Básico", resultado.get(0).getNombreCurso());
+        assertEquals("Python Básico", resultado.get(1).getNombreCurso());
+        
+        verify(restTemplate, times(1)).getForEntity(
+            eq("http://localhost:8084/api/curso"), 
+            eq(Curso[].class)
+        );
     }
 
-
-    // Este test verifica que el método obtenerTodosLosCursos
-    //retorna una lista vacía cuando no hay cursos disponibles.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
-
     @Test
-    void testObtenerTodosLosCursos_ListaVacia() {
-        when(restTemplate.getForObject(anyString(), eq(Curso[].class)))
-            .thenReturn(new Curso[0]);
+    void obtenerTodosLosCursos_ListaVacia() {
+        // Arrange
+        Curso[] cursosVacios = new Curso[0];
+        responseEntityArray = new ResponseEntity<>(cursosVacios, HttpStatus.OK);
+        
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
+            .thenReturn(responseEntityArray);
+        
+        // Act
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
+        
+        // Assert
         assertNotNull(resultado);
         assertTrue(resultado.isEmpty());
+        verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso[].class));
     }
-    // Este test verifica que el método obtenerTodosLosCursos
-    //lanza una excepción cuando ocurre un error al intentar obtener los cursos.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
-    
-    @Test
-    void testObtenerTodosLosCursos_Error() {
-        // Arrange
-        when(restTemplate.getForObject(anyString(), eq(Curso[].class)))
-            .thenThrow(new RuntimeException("Error de conexión"));
 
-        // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
-            cursoService.obtenerTodosLosCursos();
-        });
+    @Test
+    void obtenerTodosLosCursos_ErrorConexion() {
+        // Arrange
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
+            .thenThrow(new ResourceAccessException("Microservicio no disponible"));
+
+        // Act
+        List<Curso> resultado = cursoService.obtenerTodosLosCursos();
+        
+        // Assert
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+        verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso[].class));
+    }
+
+    @Test
+    void obtenerTodosLosCursos_RespuestaNull() {
+        // Arrange
+        ResponseEntity<Curso[]> responseNull = new ResponseEntity<>(null, HttpStatus.OK);
+        when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
+            .thenReturn(responseNull);
+        
+        // Act
+        List<Curso> resultado = cursoService.obtenerTodosLosCursos();
+        
+        // Assert
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
     }
 }

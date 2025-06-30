@@ -8,8 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -31,7 +31,7 @@ public class pagoControllerTest {
 @Autowired
 private MockMvc mockMvc;
 
-@MockitoBean
+@MockBean
 private PagoService pagoService;
 
 @Autowired
@@ -138,18 +138,16 @@ void obtenerPagoporId_retornaPagoPorId() throws Exception {
 //Este test sirve para verificar el comportamiento cuando no se encuentra un pago por ID.
 @Test
 void obtenerPagoPorId_noExiste_retornaEmpty() throws Exception {
-    //Esta línea sirve para simular el comportamiento del servicio de pago.
-    //Cuando se llama al método obtenerPorId del servicio de pago con un id que no existe (999L),
-    //se espera que retorne un Optional vacío.
-    when(pagoService.obtenerPorId(999L)).thenReturn(Optional.empty());
+    // Arrange
+    Long pagoId = 999L;
+    when(pagoService.obtenerPorId(pagoId)).thenReturn(Optional.empty());
 
-    //Luego, se realiza una petición GET a "/api/pagos/{id}" con el id 999L.
-    //Se espera que la respuesta tenga un estado 200 OK pero sin contenido válido.
-    mockMvc.perform(get("/api/pagos/{id}", 999L)
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    // Act & Assert
+    mockMvc.perform(get("/api/pagos/{id}", pagoId))
+            .andExpect(status().isNotFound()) // ← Cambiar de isOk() a isNotFound()
+            .andExpect(content().string("")); // O verificar el mensaje de error apropiado
 
-    verify(pagoService, times(1)).obtenerPorId(999L);
+    verify(pagoService, times(1)).obtenerPorId(pagoId);
 }
 
 
@@ -221,11 +219,12 @@ void eliminarPago_retornaNoContent() throws Exception {
     //Se verifica que no se lance ninguna excepción y que el método del servicio sea llamado.
 
     mockMvc.perform(delete("/api/pagos/1"))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent()); // ← No espera contenido, solo el estado 204 No Content
 
     // Verificar que el método eliminarPago fue llamado exactamente una vez con el id correcto
     verify(pagoService, times(1)).eliminarPago(1L);
 }
+
 }
 
 

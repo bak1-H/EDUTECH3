@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Curso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +19,5 @@ public class Curso {
 
     @Column(name = "desc_curso", nullable = true)
     private String descripcionCurso;
+    
 }

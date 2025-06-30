@@ -7,14 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Curso {
-    private Long id;
+public class CursoSimplificado {
+    private Long id; // Cambiado de cursoId a id para consistencia
     private String nombreCurso;
     private String descripcionCurso;
-    
-    // Constructor adicional para compatibilidad
-    public Curso(Long id, String nombreCurso) {
-        this.id = id;
-        this.nombreCurso = nombreCurso;
-    }
+    private Long pagoId;
+    private boolean pagoPagado;
 }

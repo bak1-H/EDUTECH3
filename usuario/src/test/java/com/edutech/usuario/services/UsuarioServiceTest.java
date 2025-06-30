@@ -1,6 +1,7 @@
-package com.edutech.usuario.controller;
-import com.edutech.usuario.model.UsuarioRequest;
+package com.edutech.usuario.services;
+
 import com.edutech.usuario.model.Usuario;
+import com.edutech.usuario.model.UsuarioRequest;
 import com.edutech.usuario.repository.UsuarioRepository;
 import com.edutech.usuario.service.MicroservicioService;
 import com.edutech.usuario.service.UsuarioService;
@@ -64,7 +65,7 @@ class UsuarioServiceTest {
      */
     @Test
     void crearUsuario_sinCurso_exitoso() {
-        // Arrange
+        // Arrange - Solo los mocks que SE VAN A USAR
         when(usuarioRepository.existsByEmail("juan@example.com")).thenReturn(false);
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
@@ -75,7 +76,6 @@ class UsuarioServiceTest {
         assertNotNull(resultado);
         assertEquals("Juan Pérez", resultado.getNombre());
         verify(usuarioRepository).save(any(Usuario.class));
-        // No debe llamar servicios de curso/pago
         verify(microservicioService, never()).verificarCursoExiste(anyLong());
     }
 
@@ -84,7 +84,7 @@ class UsuarioServiceTest {
      */
     @Test
     void crearUsuario_emailDuplicado_lanzaExcepcion() {
-        // Arrange
+        // Arrange - Solo mock necesario
         when(usuarioRepository.existsByEmail("juan@example.com")).thenReturn(true);
 
         // Act & Assert
@@ -159,7 +159,7 @@ class UsuarioServiceTest {
      */
     @Test
     void obtenerPorRut_rutInvalido_lanzaExcepcion() {
-        // Act & Assert
+        // Act & Assert - Sin mocks porque no llega a usarlos
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             usuarioService.obtenerPorRut("rut_invalido");
         });
@@ -168,21 +168,46 @@ class UsuarioServiceTest {
         verify(usuarioRepository, never()).findById(anyLong());
     }
 
+    // =========== ACTUALIZAR USUARIO ===========
+
+    /**
+     * Test principal: Actualización exitosa
+     * CORREGIDO: Solo mocks necesarios
+     */
+    @Test
+    void actualizarUsuario_datosValidos_exitoso() {
+        // Arrange - Solo configurar lo que SE USA realmente
+        when(usuarioRepository.findById(12345678L)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
+        // ELIMINADO: existsByEmail porque con el mismo email no se valida
+
+        // Act
+        Usuario resultado = usuarioService.actualizarUsuario("12345678", usuarioRequest);
+
+        // Assert
+        assertNotNull(resultado);
+        verify(usuarioRepository).save(any(Usuario.class));
+    }
+
     /**
      * Test crítico: Email duplicado en actualización
      */
     @Test
     void actualizarUsuario_emailDuplicado_lanzaExcepcion() {
         // Arrange
-        usuario.setEmail("actual@example.com"); // Email actual diferente
-        usuarioRequest.setEmail("nuevo@example.com"); // Nuevo email
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setRut(12345678L);
+        usuarioActual.setEmail("actual@example.com"); // Email diferente al del request
         
-        when(usuarioRepository.findById(12345678L)).thenReturn(Optional.of(usuario));
+        UsuarioRequest requestNuevoEmail = new UsuarioRequest();
+        requestNuevoEmail.setEmail("nuevo@example.com");
+        
+        when(usuarioRepository.findById(12345678L)).thenReturn(Optional.of(usuarioActual));
         when(usuarioRepository.existsByEmail("nuevo@example.com")).thenReturn(true);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            usuarioService.actualizarUsuario("12345678", usuarioRequest);
+            usuarioService.actualizarUsuario("12345678", requestNuevoEmail);
         });
 
         assertTrue(exception.getMessage().contains("Ya existe un usuario con ese email"));

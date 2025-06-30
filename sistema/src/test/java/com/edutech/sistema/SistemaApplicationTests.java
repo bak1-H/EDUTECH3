@@ -1,19 +1,13 @@
 package com.edutech.sistema;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootApplication
-public class SistemaApplicationTests {
+@SpringBootTest
+class SistemaApplicationTests {
 
-    public static void main(String[] args) {
-        SpringApplication.run(SistemaApplication.class, args);
-    }
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
+    @Test
+    void contextLoads() {
+        // Test básico para verificar que el contexto de Spring se carga correctamente
     }
 }

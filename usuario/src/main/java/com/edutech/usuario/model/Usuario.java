@@ -1,39 +1,36 @@
+
 package com.edutech.usuario.model;
-import java.sql.Timestamp;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 
-
+@Entity
+@Table(name = "usuarios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "usuarios")
-public class Usuario{
+public class Usuario {
     @Id
-    @Column(name = "rut", nullable = false)
     private Long rut;
-
-    @Column(name = "dv", nullable = false)
+    
+    @Column(name = "dv")
     private String dv;
-
-    @Column(name = "nombre", nullable = false)
+    
+    @Column(name = "nombre")
     private String nombre;
-
-    @Column(name = "email", nullable = false, unique = true)
+    
+    @Column(name = "email")
     private String email;
-
-    @Column(name = "contrasena", nullable = false)
+    
+    @Column(name = "contrasena")
     private String contrasena;
-
-    @Column(name = "fecha_registro", nullable = false)
-    private Timestamp fechaRegistro;
-
-    @Column(name = "tipo_usuario_id", nullable = false)
+    
+    @Column(name = "fecha_registro")
+    private LocalDateTime fechaRegistro;
+    
+    @Column(name = "tipo_usuario_id")
     private Long tipoUsuarioId;
-
-    @Transient
-    private TipoUsuarioDto tipoUsuario;
 }

@@ -9,10 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
-
+import java.util.Arrays;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -34,101 +36,167 @@ class PagoServiceTest {
         pagoEjemplo = new Pago();
         pagoEjemplo.setId(1L);
         pagoEjemplo.setEstado(true);
-
+        pagoEjemplo.setUsuarioRut(12345678L);
+        pagoEjemplo.setCursoId(101L);
     }
 
 
-    // Este test verifica que el método obtenerPagoPorId
-    //retorna un pago cuando se le pasa un ID válido.
-    // También verifica que el pago retornado tiene los valores esperados.
-    // El test utiliza Mockito para simular el comportamiento del RestTemplate.
     @Test
     void testObtenerPagoPorId_Exitoso() {
         // Arrange
         Long pagoId = 1L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenReturn(pagoEjemplo);
-
+        
         // Act
         Pago resultado = pagoService.obtenerPagoPorId(pagoId);
-
+        
         // Assert
         assertNotNull(resultado);
         assertEquals(1L, resultado.getId());
+        assertTrue(resultado.isEstado());
+        assertEquals(12345678L, resultado.getUsuarioRut());
+        assertEquals(101L, resultado.getCursoId());
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
-    // Este test verifica que el método obtenerPagoPorId
-    // lanza una excepción HttpClientErrorException cuando se intenta obtener un pago
-    // con un ID que no existe. Utiliza Mockito para simular el comportamiento del RestTemplate.
     @Test
     void testObtenerPagoPorId_NoEncontrado() {
         // Arrange
         Long pagoId = 999L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-        // Act & Assert
-        assertThrows(HttpClientErrorException.class, () -> {
-            pagoService.obtenerPagoPorId(pagoId);
-        });
+        
+        // Act
+        Pago resultado = pagoService.obtenerPagoPorId(pagoId);
+        
+        // Assert - El servicio captura la excepción y devuelve null
+        assertNull(resultado, "El servicio debe retornar null cuando el pago no se encuentra");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
+    @Test
+    void testObtenerPagoPorId_ErrorConexion() {
+        // Arrange
+        Long pagoId = 1L;
+        when(restTemplate.getForObject(anyString(), eq(Pago.class)))
+            .thenThrow(new ResourceAccessException("Microservicio no disponible"));
+        
+        // Act
+        Pago resultado = pagoService.obtenerPagoPorId(pagoId);
+        
+        // Assert - El servicio captura la excepción y devuelve null
+        assertNull(resultado, "El servicio debe retornar null cuando hay error de conexión");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
+    }
 
-    // Este test verifica que el método obtenerTodosLosPagos
-    // retorna una lista de pagos cuando se llama correctamente.
-    // También verifica que la lista contiene los pagos esperados.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
+    @Test
+    void testObtenerPagoPorId_ErrorGenerico() {
+        // Arrange
+        Long pagoId = 1L;
+        when(restTemplate.getForObject(anyString(), eq(Pago.class)))
+            .thenThrow(new RuntimeException("Error inesperado"));
+        
+        // Act
+        Pago resultado = pagoService.obtenerPagoPorId(pagoId);
+        
+        // Assert - El servicio captura todas las excepciones y devuelve null
+        assertNull(resultado, "El servicio debe retornar null en caso de error genérico");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
+    }
+
+    // === TESTS PARA obtenerTodosLosPagos ===
 
     @Test
     void testObtenerTodosLosPagos_Exitoso() {
         // Arrange
         Pago pago2 = new Pago();
         pago2.setId(2L);
+        pago2.setEstado(false);
+        pago2.setUsuarioRut(87654321L);
+        pago2.setCursoId(102L);
         
         Pago[] pagosArray = {pagoEjemplo, pago2};
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenReturn(pagosArray);
-
+        
         // Act
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
-
+        
         // Assert
         assertNotNull(resultado);
         assertEquals(2, resultado.size());
-
+        assertEquals(1L, resultado.get(0).getId());
+        assertEquals(2L, resultado.get(1).getId());
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
-
-    // Este test verifica que el método obtenerTodosLosPagos
-    // retorna una lista vacía cuando no hay pagos disponibles.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
 
     @Test
     void testObtenerTodosLosPagos_ListaVacia() {
         // Arrange
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenReturn(new Pago[0]);
-
+        
         // Act
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
-
+        
         // Assert
         assertNotNull(resultado);
         assertTrue(resultado.isEmpty());
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 
-
-    // Este test verifica que el método obtenerTodosLosPagos
-    // lanza una excepción cuando ocurre un error al intentar obtener los pagos.
-    // Utiliza Mockito para simular el comportamiento del RestTemplate.
     @Test
-    void testObtenerTodosLosPagos_Error() {
+    void testObtenerTodosLosPagos_ErrorHTTP() {
         // Arrange
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
-            .thenThrow(new RuntimeException("Error de conexión"));
+            .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
-            pagoService.obtenerTodosLosPagos();
-        });
+        // Act
+        List<Pago> resultado = pagoService.obtenerTodosLosPagos();
+        
+        // Assert - El servicio maneja errores y devuelve lista vacía
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty(), "Debe retornar lista vacía en caso de error HTTP");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
+    }
+
+    @Test
+    void testObtenerTodosLosPagos_ErrorConexion() {
+        // Arrange
+        when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
+            .thenThrow(new ResourceAccessException("Error de conexión"));
+
+        // Act
+        List<Pago> resultado = pagoService.obtenerTodosLosPagos();
+        
+        // Assert - El servicio maneja errores y devuelve lista vacía
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty(), "Debe retornar lista vacía en caso de error de conexión");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
+    }
+
+    @Test
+    void testObtenerTodosLosPagos_RespuestaNull() {
+        // Arrange
+        when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
+            .thenReturn(null);
+        
+        // Act
+        List<Pago> resultado = pagoService.obtenerTodosLosPagos();
+        
+        // Assert
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty(), "Debe retornar lista vacía cuando la respuesta es null");
+        
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 }
