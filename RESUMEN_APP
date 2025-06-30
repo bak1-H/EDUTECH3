@@ -43,6 +43,19 @@ MICROSERVICIOS Y SU FUNCIÓN
    - Se comunica con los otros microservicios para construir respuestas completas y navegables.
 
 ------------------------------------------
+COMUNICACIÓN ENTRE MICROSERVICIOS
+------------------------------------------
+
+-HTTP REST: Cada microservicio expone endpoints REST y se comunican entre sí usando URLs internas 
+ (por ejemplo, el microservicio usuario llama a curso usando RestTemplate).
+
+-Base de datos independiente: Cada microservicio comparte una base de datos (MySQL gestionado por Laragon).
+
+
+-HATEOAS: Los endpoints V2 devuelven recursos enriquecidos con enlaces (_links)
+ para facilitar la navegación entre recursos relacionados.
+
+------------------------------------------
 RELACIÓN ENTRE MICROSERVICIOS
 ------------------------------------------
 - USUARIO consulta a CURSO y PAGO.
