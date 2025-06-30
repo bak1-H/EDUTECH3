@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;
 
+
+//Este servicio se encarga de interactuar con los microservicios externos
+// para verificar la existencia de cursos y crear pagos enriquecidos con datos reales.
 @Service
 public class MicroservicioService {
     
@@ -29,6 +32,10 @@ public class MicroservicioService {
         }
     }
     
+
+    // Método para obtener el nombre del curso
+    // Si el nombre es null, intenta obtenerlo desde otro campo
+
     public String obtenerNombreCurso(Long cursoId) {
         try {
             String url = "http://localhost:8084/api/curso/" + cursoId;
@@ -84,8 +91,4 @@ public class MicroservicioService {
         }
     }
     
-    // ELIMINAR O CORREGIR este método que causa el problema
-    // public Long crearPago(Long usuarioRut, Long cursoId, boolean estadoPago) {
-    //     return crearPagoEnriquecido(usuarioRut, "Usuario " + usuarioRut, cursoId, estadoPago);
-    // }
 }

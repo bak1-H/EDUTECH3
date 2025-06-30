@@ -6,6 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
+
+//CursoEnriquecido es un DTO (Data Transfer Object) que se utiliza para enviar
+// información enriquecida de un curso a través de la API. Este objeto se utiliza
+
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -45,10 +45,6 @@ public class SistemaControllerV2 {
 
     // ========== ENDPOINTS DE PAGOS ==========
 
-    /**
-     * GET ALL - Obtener todos los pagos con HATEOAS
-     * Endpoint: GET /api/v2/sistema/pagos
-     */
     @Operation(summary = "Obtener todos los pagos con HATEOAS")
     @GetMapping("/pagos")
     public ResponseEntity<CollectionModel<EntityModel<Pago>>> obtenerTodosPagos() {
@@ -80,10 +76,7 @@ public class SistemaControllerV2 {
         }
     }
 
-    /**
-     * GET BY ID - Obtener pago por ID con HATEOAS
-     * Endpoint: GET /api/v2/sistema/pagos/{id}
-     */
+
     @Operation(summary = "Obtener pago por ID con HATEOAS")
     @GetMapping("/pagos/{id}")
     public ResponseEntity<EntityModel<Pago>> obtenerPagoPorId(@PathVariable Long id) {
@@ -112,10 +105,6 @@ public class SistemaControllerV2 {
 
     // ========== ENDPOINTS DE CURSOS ==========
 
-    /**
-     * GET ALL - Obtener todos los cursos con HATEOAS
-     * Endpoint: GET /api/v2/sistema/cursos
-     */
     @Operation(summary = "Obtener todos los cursos con HATEOAS")
     @GetMapping("/cursos")
     public ResponseEntity<CollectionModel<EntityModel<Curso>>> obtenerTodosCursos() {
@@ -147,10 +136,7 @@ public class SistemaControllerV2 {
         }
     }
 
-    /**
-     * GET BY ID - Obtener curso por ID con HATEOAS
-     * Endpoint: GET /api/v2/sistema/cursos/{id}
-     */
+
     @Operation(summary = "Obtener curso por ID con HATEOAS")
     @GetMapping("/cursos/{id}")
     public ResponseEntity<EntityModel<Curso>> obtenerCursoPorId(@PathVariable Long id) {
@@ -179,10 +165,6 @@ public class SistemaControllerV2 {
 
     // ========== ENDPOINTS DE USUARIOS ==========
 
-    /**
-     * GET ALL - Obtener todos los usuarios con HATEOAS
-     * Endpoint: GET /api/v2/sistema/usuarios
-     */
     @Operation(summary = "Obtener todos los usuarios con HATEOAS")
     @GetMapping("/usuarios")
     public ResponseEntity<CollectionModel<EntityModel<Usuario>>> obtenerTodosUsuarios() {
@@ -214,10 +196,7 @@ public class SistemaControllerV2 {
         }
     }
 
-    /**
-     * GET BY RUT - Obtener usuario por RUT con HATEOAS
-     * Endpoint: GET /api/v2/sistema/usuarios/{rut}
-     */
+
     @Operation(summary = "Obtener usuario por RUT con HATEOAS")
     @GetMapping("/usuarios/{rut}")
     public ResponseEntity<EntityModel<Usuario>> obtenerUsuarioPorRut(@PathVariable String rut) {
@@ -246,9 +225,10 @@ public class SistemaControllerV2 {
 
     // ========== MÉTODOS PRIVADOS PARA ENLACES HATEOAS ==========
 
-    /**
-     * Agregar enlaces HATEOAS a Pago
-     */
+    //Agregar enlaces HATEOAS a Pago
+    // Este método agrega enlaces HATEOAS a un objeto Pago, incluyendo enlaces a sí mismo,
+    // a la colección completa de pagos, y a los recursos relacionados como usuario y curso.
+
     private EntityModel<Pago> agregarLinksPago(Pago pago) {
         EntityModel<Pago> pagoModel = EntityModel.of(pago);
         
@@ -283,9 +263,11 @@ public class SistemaControllerV2 {
         return pagoModel;
     }
 
-    /**
-     * Agregar enlaces HATEOAS a Curso
-     */
+    
+     //Agregar enlaces HATEOAS a Curso
+     // Este método agrega enlaces HATEOAS a un objeto Curso, incluyendo enlaces a sí mismo,
+     // a la colección completa de cursos, y a los recursos relacionados como pagos y usuarios.
+
     private EntityModel<Curso> agregarLinksCurso(Curso curso) {
         EntityModel<Curso> cursoModel = EntityModel.of(curso);
         
@@ -315,9 +297,11 @@ public class SistemaControllerV2 {
         return cursoModel;
     }
 
-    /**
-     * Agregar enlaces HATEOAS a Usuario
-     */
+    
+     //Agregar enlaces HATEOAS a Usuario
+     // Este método agrega enlaces HATEOAS a un objeto Usuario, incluyendo enlaces a sí mismo,
+     // a la colección completa de usuarios, y a los recursos relacionados como pagos y cursos.
+     
     private EntityModel<Usuario> agregarLinksUsuario(Usuario usuario) {
         EntityModel<Usuario> usuarioModel = EntityModel.of(usuario);
         

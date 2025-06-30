@@ -45,20 +45,29 @@ class CursoServiceTest {
 
     @Test
     void obtenerCursoPorId_Exitoso() {
-        // Arrange
+        //esta linea sirve para simular que el microservicio devuelve un curso
+        // Mock del RestTemplate para devolver un curso específico
         Long cursoId = 1L;
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
             .thenReturn(responseEntity);
         
-        // Act
+        //esta linea entrega el resultado de la obtención
         Curso resultado = cursoService.obtenerCursoPorId(cursoId);
         
-        // Assert
+        // assertNotNull para verificar que el resultado no es nulo
         assertNotNull(resultado);
+        // assertEquals para verificar que el ID, nombre y descripción del curso son correctos
+        // y que coinciden con los valores esperados
         assertEquals(1L, resultado.getId());
+        // assertEquals para verificar que el nombre del curso es "Java Básico"
+        // y que la descripción es "Curso de Java para principiantes"
         assertEquals("Java Básico", resultado.getNombreCurso());
+        // assertEquals para verificar que la descripción del curso es "Curso de Java para principiantes"
+        // y que coincide con el valor esperado
         assertEquals("Curso de Java para principiantes", resultado.getDescripcionCurso());
         
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con los parámetros correctos
         verify(restTemplate, times(1)).getForEntity(
             eq("http://localhost:8084/api/curso/" + cursoId), 
             eq(Curso.class)
@@ -67,57 +76,79 @@ class CursoServiceTest {
 
     @Test
     void obtenerCursoPorId_NoEncontrado() {
-        // Arrange
+        // esta linea sirve para simular que el microservicio devuelve un error 404
+        // Mock del RestTemplate para lanzar una excepción cuando no se encuentra el curso
         Long cursoId = 999L;
+        // cuando el RestTemplate intenta obtener un curso con un ID que no existe
+        // se lanza una excepción HttpClientErrorException con el estado NOT_FOUND
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
         
-        // Act
+        //esta lnea entrega el resultado de la obtención
+        // Actuar y verificar que el resultado es nulo
         Curso resultado = cursoService.obtenerCursoPorId(cursoId);
         
-        // Assert
+        // assertNull para verificar que el resultado es nulo
+        // y que no se ha encontrado el curso con el ID especificado
         assertNull(resultado);
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con los parámetros correctos
         verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso.class));
     }
 
     @Test
     void obtenerCursoPorId_ErrorConexion() {
-        // Arrange
+        // esta linea sirve para simular que el microservicio no está disponible
+        // Mock del RestTemplate para lanzar una excepción ResourceAccessException
         Long cursoId = 1L;
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso/" + cursoId), eq(Curso.class)))
             .thenThrow(new ResourceAccessException("Microservicio no disponible"));
         
-        // Act
+        //esta linea entrega el resultado de la obtención
+        // Actuar y verificar que el resultado es nulo
         Curso resultado = cursoService.obtenerCursoPorId(cursoId);
         
-        // Assert
+        // assertNotNull para verificar que el resultado no es nulo
         assertNull(resultado);
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con los parámetros correctos
+        // aunque no se haya podido obtener el curso debido a un error de conexión
         verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso.class));
     }
 
     @Test
     void obtenerTodosLosCursos_Exitoso() {
-        // Arrange
+        //esta linea sirve para simular que el microservicio devuelve una lista de cursos
+        // Mock del RestTemplate para devolver una lista de cursos
         Curso curso2 = new Curso();
         curso2.setId(2L);
         curso2.setNombreCurso("Python Básico");
         curso2.setDescripcionCurso("Curso de Python para principiantes");
         
+        // Crear un array de cursos y una respuesta HTTP con estado OK
+        // que contiene los cursos simulados    
         Curso[] cursosArray = {curso, curso2};
         responseEntityArray = new ResponseEntity<>(cursosArray, HttpStatus.OK);
         
+        // cuando el RestTemplate intenta obtener todos los cursos
+        // se devuelve la respuesta con los cursos simulados
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
             .thenReturn(responseEntityArray);
         
-        // Act
+        //esta linea entrega el resultado de la obtención
+        // Actuar y verificar que se obtienen todos los cursos
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
         
-        // Assert
+        // assertNotNull para verificar que el resultado no es nulo
         assertNotNull(resultado);
+        // assertFalse para verificar que la lista de cursos no está vacía
         assertEquals(2, resultado.size());
+        // assertEquals para verificar que los cursos obtenidos son los esperados
         assertEquals("Java Básico", resultado.get(0).getNombreCurso());
         assertEquals("Python Básico", resultado.get(1).getNombreCurso());
         
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con la URL correcta y el tipo de respuesta
         verify(restTemplate, times(1)).getForEntity(
             eq("http://localhost:8084/api/curso"), 
             eq(Curso[].class)
@@ -126,49 +157,64 @@ class CursoServiceTest {
 
     @Test
     void obtenerTodosLosCursos_ListaVacia() {
-        // Arrange
+        //esta linea sirve para simular que el microservicio devuelve una lista vacía
+        // Mock del RestTemplate para devolver una lista vacía de cursos
         Curso[] cursosVacios = new Curso[0];
         responseEntityArray = new ResponseEntity<>(cursosVacios, HttpStatus.OK);
-        
+        // cuando el RestTemplate intenta obtener todos los cursos
+        // se devuelve una respuesta con una lista vacía de cursos
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
             .thenReturn(responseEntityArray);
         
-        // Act
+        //esta linea entrega el resultado de la obtención
+        // Actuar y verificar que se obtiene una lista vacía
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
         
-        // Assert
+        // assertNotNull para verificar que el resultado no es nulo
         assertNotNull(resultado);
+        // assertTrue para verificar que la lista de cursos está vacía
         assertTrue(resultado.isEmpty());
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con la URL correcta y el tipo de respuesta
+        // aunque no se hayan encontrado cursos
         verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso[].class));
     }
 
     @Test
     void obtenerTodosLosCursos_ErrorConexion() {
-        // Arrange
+        //esta linea sirve para simular que el microservicio no está disponible
+        // Mock del RestTemplate para lanzar una excepción ResourceAccessException
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
             .thenThrow(new ResourceAccessException("Microservicio no disponible"));
 
-        // Act
+        // esta linea entrega el resultado de la obtención
+        // Actuar y verificar que se obtiene una lista vacía
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
         
-        // Assert
+        // esta linea verifica que el resultado no es nulo
         assertNotNull(resultado);
+        // assertTrue para verificar que la lista de cursos está vacía
         assertTrue(resultado.isEmpty());
+        // verify para asegurarse de que se llama al método getForEntity del RestTemplate
+        // y que se ha ejecutado una vez con la URL correcta y el tipo de respuesta
         verify(restTemplate, times(1)).getForEntity(anyString(), eq(Curso[].class));
     }
 
     @Test
     void obtenerTodosLosCursos_RespuestaNull() {
-        // Arrange
+        //esta linea sirve para simular que el microservicio devuelve una respuesta nula
+        // Mock del RestTemplate para devolver una respuesta nula
         ResponseEntity<Curso[]> responseNull = new ResponseEntity<>(null, HttpStatus.OK);
         when(restTemplate.getForEntity(eq("http://localhost:8084/api/curso"), eq(Curso[].class)))
             .thenReturn(responseNull);
         
-        // Act
+        //esta linea entrega el resultado de la obtención
         List<Curso> resultado = cursoService.obtenerTodosLosCursos();
         
-        // Assert
+        //assertNotNull para verificar que el resultado no es nulo
         assertNotNull(resultado);
+        // assertTrue para verificar que la lista de cursos está vacía
+        // ya que la respuesta del microservicio fue nula
         assertTrue(resultado.isEmpty());
     }
 }

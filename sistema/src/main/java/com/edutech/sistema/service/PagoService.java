@@ -11,6 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
+
+
+// PagoService es un servicio que se encarga de interactuar con el microservicio de pagos
+// para obtener información sobre pagos. Este servicio utiliza RestTemplate para realizar
+// solicitudes HTTP al microservicio de pagos y manejar las respuestas. Proporciona métodos
+// para obtener un pago por su ID y para obtener todos los pagos disponibles. Además,
+// maneja excepciones específicas como HttpClientErrorException.NotFound para registrar
+// advertencias y otros errores para registrar mensajes de error.
 @Service
 public class PagoService {
 
@@ -19,6 +27,11 @@ public class PagoService {
     @Autowired
     private RestTemplate restTemplate;
 
+
+    // Método para obtener un pago por su ID
+    // Este método realiza una solicitud GET al microservicio de pagos
+    // y retorna un objeto Pago si se encuentra, o null si no se encuentra o hay un error
+    // Utiliza RestTemplate para realizar la solicitud HTTP y maneja excepciones específicas.
     public Pago obtenerPagoPorId(Long id) {
         try {
             String url = "http://localhost:8083/api/pagos/" + id;
@@ -32,6 +45,13 @@ public class PagoService {
         }
     }
 
+
+    // Método para obtener todos los pagos
+    // Este método realiza una solicitud GET al microservicio de pagos
+    // y retorna una lista de objetos Pago. Si no se encuentran pagos o hay un error,
+    // retorna una lista vacía. Utiliza RestTemplate para realizar la solicitud HTTP
+    // y maneja excepciones específicas como HttpClientErrorException.NotFound para registrar
+    // advertencias y otros errores para registrar mensajes de error.
     public List<Pago> obtenerTodosLosPagos() {
         try {
             String url = "http://localhost:8083/api/pagos";

@@ -10,6 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.HashMap;
 
+
+//SistemaService es un servicio que se encarga de interactuar con los microservicios externos
+// para verificar la existencia de cursos y crear pagos enriquecidos con datos reales.
+
 @Service
 public class SistemaService {
     

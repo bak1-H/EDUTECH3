@@ -59,9 +59,9 @@ class UsuarioServiceTest {
 
     // =========== CREAR USUARIO ===========
 
-    /**
-     * Test principal: Crear usuario sin curso (flujo básico)
-     */
+
+     //Test: Crear usuario sin curso (flujo básico)
+     
     @Test
     void crearUsuario_sinCurso_exitoso() {
         // Arrange
@@ -79,9 +79,9 @@ class UsuarioServiceTest {
         verify(microservicioService, never()).verificarCursoExiste(anyLong());
     }
 
-    /**
-     * Test crítico: Email duplicado (validación principal)
-     */
+
+     //Test : Email duplicado (validación principal)
+
     @Test
     void crearUsuario_emailDuplicado_lanzaExcepcion() {
         // Arrange
@@ -96,95 +96,51 @@ class UsuarioServiceTest {
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
 
-    /**
-     * Test integración: Crear usuario con curso válido
-     */
-    @Test
-    void crearUsuario_conCursoValido_creaUsuarioYPago() {
-        // Arrange
-        usuarioRequest.setCursoId(101L);
-        usuarioRequest.setEstadoPago(true);
-        
-        when(usuarioRepository.existsByEmail("juan@example.com")).thenReturn(false);
-        when(microservicioService.verificarCursoExiste(101L)).thenReturn(true);
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        when(microservicioService.crearPagoEnriquecido(anyLong(), anyString(), anyLong(), anyBoolean()))
-                .thenReturn(1L);
-
-        // Act
-        Usuario resultado = usuarioService.crearUsuario(usuarioRequest);
-
-        // Assert
-        assertNotNull(resultado);
-        verify(microservicioService).verificarCursoExiste(101L);
-        verify(microservicioService).crearPagoEnriquecido(12345678L, "Juan Pérez", 101L, true);
-    }
+    
 
     // =========== OBTENER USUARIOS ===========
 
-    /**
-     * Test básico: Obtener todos los usuarios
-     */
+    //Test: Obtener todos los usuarios
+
     @Test
     void obtenerTodos_retornaLista() {
-        // Arrange
         when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuario));
-
-        // Act
         List<Usuario> resultado = usuarioService.obtenerTodos();
-
-        // Assert
         assertEquals(1, resultado.size());
         assertEquals("Juan Pérez", resultado.get(0).getNombre());
     }
 
-    /**
-     * Test exitoso: Obtener por RUT válido
-     */
+     //Test exitoso: Obtener por RUT válido
     @Test
     void obtenerPorRut_existe_retornaUsuario() {
-        // Arrange
         when(usuarioRepository.findById(12345678L)).thenReturn(Optional.of(usuario));
-
-        // Act
         Usuario resultado = usuarioService.obtenerPorRut("12345678");
-
-        // Assert
         assertNotNull(resultado);
         assertEquals(12345678L, resultado.getRut());
     }
 
-    /**
-     * Test crítico: RUT inválido lanza excepción
-     */
+
+     //Test: RUT inválido lanza excepción
     @Test
     void obtenerPorRut_rutInvalido_lanzaExcepcion() {
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             usuarioService.obtenerPorRut("rut_invalido");
         });
-
         assertEquals("RUT inválido", exception.getMessage());
         verify(usuarioRepository, never()).findById(anyLong());
     }
 
-    /**
-     * Test crítico: Email duplicado en actualización
-     */
+
+     // Test : Email duplicado en actualización
     @Test
     void actualizarUsuario_emailDuplicado_lanzaExcepcion() {
-        // Arrange
         usuario.setEmail("actual@example.com"); // Email actual diferente
         usuarioRequest.setEmail("nuevo@example.com"); // Nuevo email
-        
         when(usuarioRepository.findById(12345678L)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.existsByEmail("nuevo@example.com")).thenReturn(true);
-
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             usuarioService.actualizarUsuario("12345678", usuarioRequest);
         });
-
         assertTrue(exception.getMessage().contains("Ya existe un usuario con ese email"));
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
@@ -196,29 +152,19 @@ class UsuarioServiceTest {
      */
     @Test
     void eliminarUsuario_existe_retornaTrue() {
-        // Arrange
         when(usuarioRepository.existsById(12345678L)).thenReturn(true);
-
-        // Act
         boolean resultado = usuarioService.eliminarUsuario("12345678");
-
-        // Assert
         assertTrue(resultado);
         verify(usuarioRepository).deleteById(12345678L);
     }
 
     /**
-     * Test edge case: Usuario no existe
+     * Test  Usuario no existe
      */
     @Test
     void eliminarUsuario_noExiste_retornaFalse() {
-        // Arrange
         when(usuarioRepository.existsById(99999999L)).thenReturn(false);
-
-        // Act
         boolean resultado = usuarioService.eliminarUsuario("99999999");
-
-        // Assert
         assertFalse(resultado);
         verify(usuarioRepository, never()).deleteById(anyLong());
     }

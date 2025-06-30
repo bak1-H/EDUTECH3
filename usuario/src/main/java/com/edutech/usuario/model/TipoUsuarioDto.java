@@ -1,7 +1,5 @@
 //Acá se define un DTO (Data Transfer Object) para representar los tipos de usuario
 // que se utilizará para transferir datos entre el microservicio de usuario y el de tipo usuario.
-
-
 package com.edutech.usuario.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;

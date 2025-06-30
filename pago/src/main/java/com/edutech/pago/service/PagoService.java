@@ -38,11 +38,13 @@ public class PagoService {
 
     public Pago guardarPago(Pago pago) {
         // Validar que el curso existe
+        // Aquí se podría llamar a un servicio externo o repositorio para verificar la existencia del curso
         if (pago.getCursoId() == null || pago.getCursoId() <= 0) {
             throw new RuntimeException("El curso debe tener un ID válido");
         }
         
         // Validar que el usuario existe
+        // Aquí se podría llamar a un servicio externo o repositorio para verificar la existencia del usuario
         if (pago.getUsuarioRut() == null || pago.getUsuarioRut() <= 0) {
             throw new RuntimeException("El usuario debe tener un RUT válido");
         }
@@ -50,6 +52,10 @@ public class PagoService {
         return pagoRepository.save(pago);
     }
 
+    // Método para actualizar el estado de un pago
+    // Este método recibe el ID del pago y el nuevo estado (true = pagado, false = pendiente)
+    // y actualiza el estado del pago en la base de datos.
+    // Si el pago no existe, lanza una excepción.
     public Pago actualizarEstado(Long id, boolean estado) {
         Optional<Pago> pagoOpt = pagoRepository.findById(id);
         if (pagoOpt.isPresent()) {

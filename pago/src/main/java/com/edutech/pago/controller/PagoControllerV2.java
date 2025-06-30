@@ -83,6 +83,12 @@ public class PagoControllerV2 {
 
 
     // Método privado para agregar links HATEOAS a cada Pago
+    /**
+     * Convierte un objeto Pago a EntityModel con enlaces HATEOAS.
+     *
+     * @param pago El objeto Pago a convertir.
+     * @return EntityModel con enlaces HATEOAS.
+     */
     private EntityModel<Pago> toModel(Pago pago) {
         EntityModel<Pago> model = EntityModel.of(pago);
         model.add(linkTo(methodOn(PagoControllerV2.class).obtenerPorId(pago.getId())).withSelfRel());

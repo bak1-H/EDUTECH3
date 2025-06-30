@@ -43,69 +43,90 @@ class PagoServiceTest {
 
     @Test
     void testObtenerPagoPorId_Exitoso() {
-        // Arrange
+        //esta linea simula el comportamiento del RestTemplate
+        // cuando se obtiene un pago por ID
         Long pagoId = 1L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenReturn(pagoEjemplo);
         
-        // Act
+        //esta linea llama al método del servicio
+        // que obtiene el pago por ID
         Pago resultado = pagoService.obtenerPagoPorId(pagoId);
         
-        // Assert
+        //esta linea verifica que el resultado no es nulo
         assertNotNull(resultado);
+        //esta linea verifica que el ID, estado, usuarioRut y cursoId son correctos
         assertEquals(1L, resultado.getId());
+        // Verifica que el estado es verdadero
         assertTrue(resultado.isEstado());
+        // Verifica que el usuarioRut y cursoId son correctos
         assertEquals(12345678L, resultado.getUsuarioRut());
         assertEquals(101L, resultado.getCursoId());
-        
+        //esta linea verifica que el RestTemplate fue llamado una vez
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
     @Test
     void testObtenerPagoPorId_NoEncontrado() {
-        // Arrange
+        //esta linea simula el comportamiento del RestTemplate
+        // cuando se intenta obtener un pago que no existe
         Long pagoId = 999L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
         
-        // Act
+        //esta linea llama al método del servicio
+        // que obtiene el pago por ID
         Pago resultado = pagoService.obtenerPagoPorId(pagoId);
         
-        // Assert - El servicio captura la excepción y devuelve null
+        // esta linea verifica que el resultado es null
+        // ya que el pago no fue encontrado
         assertNull(resultado, "El servicio debe retornar null cuando el pago no se encuentra");
         
+        //esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener el pago por ID
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
     @Test
     void testObtenerPagoPorId_ErrorConexion() {
-        // Arrange
+        //esta linea simula el comportamiento del RestTemplate
+        // cuando hay un error de conexión al intentar obtener un pago
         Long pagoId = 1L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenThrow(new ResourceAccessException("Microservicio no disponible"));
         
-        // Act
+        //esta linea llama al método del servicio
+        // que obtiene el pago por ID
         Pago resultado = pagoService.obtenerPagoPorId(pagoId);
         
-        // Assert - El servicio captura la excepción y devuelve null
+        // esta linea verifica que el resultado es null
+        // ya que hubo un error de conexión
         assertNull(resultado, "El servicio debe retornar null cuando hay error de conexión");
         
+        //esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener el pago por ID
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
     @Test
     void testObtenerPagoPorId_ErrorGenerico() {
-        // Arrange
+        // esta linea simula el comportamiento del RestTemplate
+        // cuando ocurre un error inesperado al intentar obtener un pago
+        // por ID
+        // Esto puede ser útil para verificar que el servicio maneja errores genéricos
         Long pagoId = 1L;
         when(restTemplate.getForObject(anyString(), eq(Pago.class)))
             .thenThrow(new RuntimeException("Error inesperado"));
         
-        // Act
+        // esta linea llama al método del servicio
         Pago resultado = pagoService.obtenerPagoPorId(pagoId);
         
-        // Assert - El servicio captura todas las excepciones y devuelve null
+        // esta linea verifica que el resultado es null
+        // ya que hubo un error genérico
         assertNull(resultado, "El servicio debe retornar null en caso de error genérico");
-        
+
+        // esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener el pago por ID
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago.class));
     }
 
@@ -113,90 +134,124 @@ class PagoServiceTest {
 
     @Test
     void testObtenerTodosLosPagos_Exitoso() {
-        // Arrange
+        //acá se simula el comportamiento del RestTemplate
+        // cuando se obtienen todos los pagos   
         Pago pago2 = new Pago();
         pago2.setId(2L);
         pago2.setEstado(false);
         pago2.setUsuarioRut(87654321L);
         pago2.setCursoId(102L);
         
+        // Se crea un arreglo de pagos que incluye el pagoEjemplo y otro pago
+        // Esto simula la respuesta del microservicio de pagos
         Pago[] pagosArray = {pagoEjemplo, pago2};
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenReturn(pagosArray);
         
-        // Act
+        //acá se llama al método del servicio
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
         
-        // Assert
+        // esta linea verifica que el resultado no es nulo
         assertNotNull(resultado);
+
+        // esta linea verifica que el tamaño de la lista es 2
         assertEquals(2, resultado.size());
+
+        // esta linea verifica que los IDs de los pagos son correctos
         assertEquals(1L, resultado.get(0).getId());
         assertEquals(2L, resultado.get(1).getId());
         
+        // esta linea verifica que los estados de los pagos son correctos
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 
     @Test
     void testObtenerTodosLosPagos_ListaVacia() {
-        // Arrange
+        //acá se simula el comportamiento del RestTemplate
+        // cuando se obtienen todos los pagos y no hay ninguno
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenReturn(new Pago[0]);
         
-        // Act
+        // acá se llama al método del servicio
+        // que obtiene todos los pagos
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
         
-        // Assert
+        // esta linea verifica que el resultado no es nulo
         assertNotNull(resultado);
+        // esta linea verifica que el resultado es una lista vacía
+        // ya que no hay pagos disponibles
         assertTrue(resultado.isEmpty());
         
+        // esta linea verifica que el RestTemplate fue llamado una vez
+        // para obtener todos los pagos
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 
     @Test
     void testObtenerTodosLosPagos_ErrorHTTP() {
-        // Arrange
+        //acá se simula el comportamiento del RestTemplate
+        // cuando se intenta obtener todos los pagos y ocurre un error HTTP
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
-        // Act
+        //llama al metodo del servicio
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
         
-        // Assert - El servicio maneja errores y devuelve lista vacía
+        // assernotNull para verificar que el resultado no es nulo
+        // y que el servicio maneja el error correctamente
         assertNotNull(resultado);
+
+        // assertTrue para verificar que el resultado es una lista vacía
+        // ya que hubo un error HTTP al intentar obtener los pagos
         assertTrue(resultado.isEmpty(), "Debe retornar lista vacía en caso de error HTTP");
         
+        // esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener todos los pagos
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 
     @Test
     void testObtenerTodosLosPagos_ErrorConexion() {
-        // Arrange
+        // esta linea simula el comportamiento del RestTemplate
+        // cuando hay un error de conexión al intentar obtener todos los pagos
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenThrow(new ResourceAccessException("Error de conexión"));
 
-        // Act
+        // acá se llama al método del servicio
+        // que obtiene todos los pagos
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
         
-        // Assert - El servicio maneja errores y devuelve lista vacía
+        // acá se verifica que el resultado no es nulo
+        // y que el servicio maneja el error de conexión correctamente
         assertNotNull(resultado);
+
+        // esta linea verifica que el resultado es una lista vacía
+        // ya que hubo un error de conexión al intentar obtener los pagos
         assertTrue(resultado.isEmpty(), "Debe retornar lista vacía en caso de error de conexión");
         
+        // esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener todos los pagos
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 
     @Test
     void testObtenerTodosLosPagos_RespuestaNull() {
-        // Arrange
+        //acá se simula el comportamiento del RestTemplate
+        // cuando la respuesta al intentar obtener todos los pagos es null
         when(restTemplate.getForObject(anyString(), eq(Pago[].class)))
             .thenReturn(null);
         
-        // Act
+        // llama metodo
         List<Pago> resultado = pagoService.obtenerTodosLosPagos();
         
-        // Assert
-        assertNotNull(resultado);
+        // esta linea verifica que el resultado no es nulo
+        assertNotNull(resultado);  
+
+        // esta linea verifica que el resultado es una lista vacía
         assertTrue(resultado.isEmpty(), "Debe retornar lista vacía cuando la respuesta es null");
         
+        // esta linea verifica que el RestTemplate fue llamado una vez
+        // para intentar obtener todos los pagos
         verify(restTemplate, times(1)).getForObject(anyString(), eq(Pago[].class));
     }
 }

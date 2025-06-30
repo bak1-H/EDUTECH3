@@ -6,6 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+//PagoEnriquecido es un DTO (Data Transfer Object) que se utiliza para enviar
+// información enriquecida de un pago a través de la API. Este objeto se utiliza    
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

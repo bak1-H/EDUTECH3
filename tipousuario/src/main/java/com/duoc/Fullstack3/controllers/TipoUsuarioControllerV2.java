@@ -35,10 +35,6 @@ public class TipoUsuarioControllerV2 {
     @Autowired
     private TipoUsuarioService tipoUsuarioService;
 
-    /**
-     * GET ALL - Obtener todos los tipos de usuario con HATEOAS
-     * Endpoint: GET /api/v2/tipos-usuario
-     */
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<TipoUsuario>>> obtenerTodos() {
         try {
@@ -52,11 +48,16 @@ public class TipoUsuarioControllerV2 {
 
             // Crear colección con link a sí misma
             CollectionModel<EntityModel<TipoUsuario>> collection = CollectionModel.of(tiposModel);
+            // Agregar enlace a la colección completa
             collection.add(linkTo(methodOn(TipoUsuarioControllerV2.class).obtenerTodos()).withSelfRel());
-            
+            // logger.info sirve para registrar información en la consola
+            // y es útil para depurar y monitorear el comportamiento de la aplicación
             logger.info("Obtenidos {} tipos de usuario con HATEOAS", tipos.size());
+            // Retornar la colección con estado 200 OK
+            // ResponseEntity.ok es una forma de construir una respuesta HTTP 200 OK
             return ResponseEntity.ok(collection);
-            
+
+
         } catch (Exception e) {
             logger.error("Error al obtener todos los tipos de usuario: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -66,7 +67,8 @@ public class TipoUsuarioControllerV2 {
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<TipoUsuario>> obtenerPorId(@PathVariable Long id) {
         try {
-            // Validar ID
+            // esta linea sirve para validar el ID recibido
+            // Si el ID es nulo o menor o igual a 0, retorna un error
             if (id == null || id <= 0) {
                 logger.warn("ID inválido recibido: {}", id);
                 return ResponseEntity.badRequest().build();

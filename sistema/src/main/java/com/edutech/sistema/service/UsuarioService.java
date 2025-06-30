@@ -11,6 +11,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
+
+//UsuarioService es un servicio que se encarga de interactuar con el microservicio de usuarios
+// para obtener información sobre usuarios. Este servicio utiliza RestTemplate para realizar
+// solicitudes HTTP al microservicio de usuarios y manejar las respuestas. Proporciona métodos
+// para obtener un usuario por su RUT y para obtener todos los usuarios disponibles. Además,
+// maneja excepciones específicas como HttpClientErrorException.NotFound para registrar advertencias
+// y otros errores para registrar mensajes de error. 
 @Service
 public class UsuarioService {
 

@@ -75,34 +75,49 @@ class SistemaControllerTest {
 
     @Test
     void testGetAllPagos_OK() throws Exception {
+        // Simular que el servicio de pagos devuelve una lista con un pago
         when(pagoService.obtenerTodosLosPagos()).thenReturn(Arrays.asList(pagoEjemplo));
+        // Simular que el servicio de enriquecimiento devuelve una lista vacía
         when(enriquecimientoService.enriquecerPagos(any())).thenReturn(new ArrayList<>());
-
+        // Realizar la petición GET a la ruta /api/sistema/pagos
+        // y verificar que la respuesta es OK (200)
         mockMvc.perform(get("/api/sistema/pagos"))
                 .andExpect(status().isOk());
-
+        // Verificar que el servicio de pagos fue llamado una vez
         verify(pagoService, times(1)).obtenerTodosLosPagos();
     }
 
     @Test
     void testGetAllCursos_OK() throws Exception {
+        // Simular que el servicio de cursos devuelve una lista con un curso
+        // y que el servicio de enriquecimiento devuelve una lista vacía
         when(cursoService.obtenerTodosLosCursos()).thenReturn(Arrays.asList(cursoEjemplo));
+        // Simular que el servicio de enriquecimiento devuelve una lista vacía
+        // para evitar que se realicen enriquecimientos innecesarios en este test
         when(enriquecimientoService.enriquecerCursos(any())).thenReturn(new ArrayList<>());
 
+        // Realizar la petición GET a la ruta /api/sistema/cursos
+        // y verificar que la respuesta es OK (200)
         mockMvc.perform(get("/api/sistema/cursos"))
                 .andExpect(status().isOk());
 
+        // Verificar que el servicio de cursos fue llamado una vez
+        // para asegurarse de que se está obteniendo la lista de cursos correctamente
         verify(cursoService, times(1)).obtenerTodosLosCursos();
     }
 
     @Test
     void testGetAllUsuarios_OK() throws Exception {
+        // Simular que el servicio de usuarios devuelve una lista con un usuario
+        // y que el servicio de enriquecimiento devuelve una lista vacía
         when(usuarioService.obtenerTodosLosUsuarios()).thenReturn(Arrays.asList(usuarioEjemplo));
         when(enriquecimientoService.enriquecerUsuarios(any())).thenReturn(new ArrayList<>());
 
-        mockMvc.perform(get("/api/sistema/usuarios"))
+        //mockMvc realiza una petición GET a la ruta /api/sistema/usuarios
+        // y verifica que la respuesta es OK (200)
+        mockMvc.perform(get("/api/sistema/usuarios"))   
                 .andExpect(status().isOk());
-
+        // Verificar que el servicio de usuarios fue llamado una vez
         verify(usuarioService, times(1)).obtenerTodosLosUsuarios();
     }
 }
