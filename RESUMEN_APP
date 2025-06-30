@@ -1,0 +1,100 @@
+==========================================
+RESUMEN DEL PROYECTO EDUTECH3
+==========================================
+
+EDUTECH3 es una plataforma educativa basada en microservicios, desarrollada en Java con Spring Boot y utilizando MySQL (gestionado por Laragon) como base de datos.
+El sistema está diseñado para gestionar usuarios, cursos, pagos y roles (tipos de usuario), permitiendo una arquitectura escalable, desacoplada y fácil de mantener.
+
+------------------------------------------
+TECNOLOGÍAS UTILIZADAS
+------------------------------------------
+- Java 17
+- Spring Boot (REST API)
+- Spring Data JPA (acceso a datos)
+- Spring HATEOAS (enlaces navegables en las respuestas)
+- Swagger/OpenAPI (documentación interactiva)
+- Lombok (reducción de código repetitivo)
+- MySQL (base de datos, gestionada por Laragon)
+- Maven (gestión de dependencias)
+- Laragon (entorno local para bases de datos y servicios)
+
+------------------------------------------
+MICROSERVICIOS Y SU FUNCIÓN
+------------------------------------------
+
+1. USUARIO
+   - Gestiona usuarios del sistema.
+   - Se comunica con CURSO para validar cursos y con PAGO para registrar pagos al crear usuarios.
+
+2. CURSO
+   - Administra los cursos disponibles.
+   - Es consultado por USUARIO y PAGO para validar y obtener información de cursos.
+
+3. PAGO
+   - Gestiona los pagos de usuarios por cursos.
+   - Es llamado por USUARIO al registrar un usuario con curso asignado.
+
+4. TIPOUSUARIO
+   - Define los roles y permisos de los usuarios.
+   - Es referenciado por USUARIO para asignar roles.
+
+5. SISTEMA
+   - API Gateway(fachada) que expone endpoints agregados y enriquecidos.
+   - Se comunica con los otros microservicios para construir respuestas completas y navegables.
+
+------------------------------------------
+RELACIÓN ENTRE MICROSERVICIOS
+------------------------------------------
+- USUARIO consulta a CURSO y PAGO.
+- PAGO relaciona USUARIO y CURSO.
+- USUARIO referencia a TIPOUSUARIO.
+- SISTEMA consulta y enriquece datos de todos los anteriores.
+
+------------------------------------------
+FLUJO DE USO TÍPICO
+------------------------------------------
+1. Registrar usuario con curso:
+   - USUARIO valida curso (CURSO), crea usuario y registra pago (PAGO).
+2. Consultar pagos de un usuario:
+   - PAGO lista pagos por usuario.
+   - SISTEMA puede enriquecer la respuesta con datos de usuario y curso.
+3. Consultar cursos y usuarios inscritos:
+   - CURSO lista cursos.
+   - SISTEMA enriquece la respuesta con usuarios inscritos y pagos.
+
+------------------------------------------
+HATEOAS Y NAVEGACIÓN
+------------------------------------------
+- Los endpoints V2 devuelven recursos con enlaces (_links) para facilitar la navegación entre recursos relacionados.
+- Ejemplo: Un pago incluye enlaces a su usuario y curso.
+
+------------------------------------------
+USO CON LARAGON
+------------------------------------------
+- Levanta Laragon y asegúrate de que MySQL está activo.
+- Cada microservicio tiene su propia base de datos configurada.
+- Usa Swagger UI para probar los endpoints.
+- Ejecuta cada microservicio con `mvn spring-boot:run`.
+
+
+
+ Diagrama de Microservicios
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   FRONTEND      │    │   API GATEWAY   │    │   DATABASE      │
+│                 │◄──►│   (SISTEMA)     │◄──►│   Laragon       │
+│                 │    │   Puerto: 8085  │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                │               │               │
+        ┌───────▼──────┐ ┌──────▼─────┐ ┌──────▼─────┐
+        │   USUARIO    │ │   CURSO    │ │    PAGO    │
+        │ Puerto: 8081 │ │Puerto: 8084│ │Puerto: 8083│
+        └──────────────┘ └────────────┘ └────────────┘
+                │
+        ┌───────▼──────┐
+        │ TIPOUSUARIO  │
+        │ Puerto: 8082 │
+        └──────────────┘
+
+

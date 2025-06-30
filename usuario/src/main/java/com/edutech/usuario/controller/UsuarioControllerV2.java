@@ -3,7 +3,12 @@ package com.edutech.usuario.controller;
 import com.edutech.usuario.model.Usuario;
 import com.edutech.usuario.model.UsuarioRequest;
 import com.edutech.usuario.service.UsuarioService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -19,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/v2/usuarios")
-@CrossOrigin(origins = "*")
+@Tag(name = "Usuarios con ATHEOAS", description = "Operacion GET con HATEOAS")
 public class UsuarioControllerV2 {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioControllerV2.class);
@@ -27,30 +32,9 @@ public class UsuarioControllerV2 {
     @Autowired
     private UsuarioService usuarioService;
 
-    // CREATE - Crear usuario
-    @PostMapping
-    public ResponseEntity<EntityModel<Usuario>> crear(@RequestBody UsuarioRequest request) {
-        try {
-            // Verificar si el RUT ya existe
-            Usuario usuarioExistente = usuarioService.obtenerPorRut(request.getRut().toString());
-            if (usuarioExistente != null) {
-                logger.warn("Intento de crear usuario con RUT duplicado: {}", request.getRut());
-                return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            }
-            
-            Usuario usuario = usuarioService.crearUsuario(request);
-            EntityModel<Usuario> usuarioModel = agregarLinks(usuario);
-            return ResponseEntity.status(HttpStatus.CREATED).body(usuarioModel);
-        } catch (RuntimeException e) {
-            logger.error("Error de validación al crear usuario: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } catch (Exception e) {
-            logger.error("Error interno al crear usuario: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     // READ - Obtener todos los usuarios
+    @Operation(summary = "Obtener todos los usuarios")
+    @Description("Este endpoint permite obtener una lista de todos los usuarios registrados en el sistema.")
     @GetMapping
     public ResponseEntity<CollectionModel<EntityModel<Usuario>>> obtenerTodos() {
         try {
@@ -71,6 +55,8 @@ public class UsuarioControllerV2 {
     }
 
     // READ - Obtener usuario por RUT
+    @Operation(summary = "Obtener usuario por RUT")
+    @Description("Este endpoint permite obtener un usuario específico utilizando su RUT.")
     @GetMapping("/{rut}")
     public ResponseEntity<EntityModel<Usuario>> obtenerPorRut(@PathVariable String rut) {
         try {
@@ -89,44 +75,6 @@ public class UsuarioControllerV2 {
         }
     }
 
-    // UPDATE - Actualizar usuario
-    @PutMapping("/{rut}")
-    public ResponseEntity<EntityModel<Usuario>> actualizar(@PathVariable String rut, 
-                                                          @RequestBody UsuarioRequest request) {
-        try {
-            Usuario usuario = usuarioService.actualizarUsuario(rut, request);
-            if (usuario != null) {
-                EntityModel<Usuario> usuarioModel = agregarLinks(usuario);
-                return ResponseEntity.ok(usuarioModel);
-            }
-            return ResponseEntity.notFound().build();
-        } catch (RuntimeException e) {
-            logger.error("Error de validación al actualizar usuario {}: {}", rut, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } catch (Exception e) {
-            logger.error("Error interno al actualizar usuario {}: {}", rut, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // DELETE - Eliminar usuario
-    @DeleteMapping("/{rut}")
-    public ResponseEntity<Void> eliminar(@PathVariable String rut) {
-        try {
-            boolean eliminado = usuarioService.eliminarUsuario(rut);
-            if (eliminado) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.notFound().build();
-        } catch (RuntimeException e) {
-            logger.error("Error de validación al eliminar usuario {}: {}", rut, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } catch (Exception e) {
-            logger.error("Error interno al eliminar usuario {}: {}", rut, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
     // Método privado para agregar enlaces HATEOAS
     private EntityModel<Usuario> agregarLinks(Usuario usuario) {
         String rutString = usuario.getRut().toString();
@@ -134,8 +82,6 @@ public class UsuarioControllerV2 {
         EntityModel<Usuario> usuarioModel = EntityModel.of(usuario);
         
         usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).obtenerPorRut(rutString)).withSelfRel());
-        usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).actualizar(rutString, null)).withRel("actualizar"));
-        usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).eliminar(rutString)).withRel("eliminar"));
         usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).obtenerTodos()).withRel("usuarios"));
         
         return usuarioModel;

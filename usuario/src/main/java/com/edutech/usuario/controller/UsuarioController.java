@@ -3,7 +3,12 @@ package com.edutech.usuario.controller;
 import com.edutech.usuario.model.Usuario;
 import com.edutech.usuario.model.UsuarioRequest;
 import com.edutech.usuario.service.UsuarioService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin("*")
+@Tag(name = "Usuarios", description = "Operaciones para gestionar usuarios del sistema")
 public class UsuarioController {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
@@ -22,7 +27,11 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
+
+    
     // === OBTENER TODOS LOS USUARIOS ===
+    @Operation(summary = "Obtener todos los usuarios")
+    @Description("Este endpoint permite obtener una lista de todos los usuarios registrados en el sistema.")
     @GetMapping
     public ResponseEntity<List<Usuario>> obtenerTodos() {
         try {
@@ -35,6 +44,8 @@ public class UsuarioController {
     }
 
     // === OBTENER USUARIO POR RUT ===
+    @Operation(summary = "Obtener usuario por RUT")
+    @Description("Este endpoint permite obtener un usuario específico utilizando su RUT.")
     @GetMapping("/{rut}")
     public ResponseEntity<Usuario> obtenerPorRut(@PathVariable String rut) {
         try {
@@ -54,6 +65,8 @@ public class UsuarioController {
     }
 
     // === CREAR USUARIO ===
+    @Operation(summary = "Crear un nuevo usuario")
+    @Description("Este endpoint permite crear un nuevo usuario en el sistema. Si el RUT ya existe, se retornará un error 409.")
     @PostMapping
     public ResponseEntity<Usuario> crearUsuario(@RequestBody UsuarioRequest usuarioRequest) {
         try {
@@ -77,6 +90,8 @@ public class UsuarioController {
     }
 
     // === ACTUALIZAR USUARIO ===
+    @Operation(summary = "Actualizar un usuario existente")
+    @Description("Este endpoint permite actualizar la información de un usuario existente utilizando su RUT. Si el usuario no existe, se retornará un error 404.")
     @PutMapping("/{rut}")
     public ResponseEntity<Usuario> actualizarUsuario(@PathVariable String rut, @RequestBody UsuarioRequest usuarioRequest) {
         try {
@@ -96,6 +111,8 @@ public class UsuarioController {
     }
 
     // === ELIMINAR USUARIO ===
+    @Operation(summary = "Eliminar un usuario existente")
+    @Description("Este endpoint permite eliminar un usuario del sistema utilizando su RUT. Si el usuario no existe, se retornará un error 404.")
     @DeleteMapping("/{rut}")
     public ResponseEntity<Void> eliminarUsuario(@PathVariable String rut) {
         try {
@@ -114,44 +131,5 @@ public class UsuarioController {
         }
     }
 
-    // === VERIFICAR SI RUT EXISTE ===
-    @GetMapping("/existe/{rut}")
-    public ResponseEntity<Boolean> existeRut(@PathVariable String rut) {
-        try {
-            Usuario usuario = usuarioService.obtenerPorRut(rut);
-            boolean existe = (usuario != null);
-            return ResponseEntity.ok(existe);
-        } catch (Exception e) {
-            logger.error("Error al verificar existencia de RUT {}: {}", rut, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-        }
-    }
 
-    // === OBTENER POR TIPO DE USUARIO ===
-    @GetMapping("/tipo/{tipoUsuarioId}")
-    public ResponseEntity<List<Usuario>> obtenerPorTipoUsuario(@PathVariable Long tipoUsuarioId) {
-        try {
-            List<Usuario> usuarios = usuarioService.obtenerPorTipoUsuario(tipoUsuarioId);
-            return ResponseEntity.ok(usuarios);
-        } catch (Exception e) {
-            logger.error("Error al obtener usuarios por tipo {}: {}", tipoUsuarioId, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    // === OBTENER POR EMAIL ===
-    @GetMapping("/email/{email}")
-    public ResponseEntity<Usuario> obtenerPorEmail(@PathVariable String email) {
-        try {
-            Usuario usuario = usuarioService.obtenerPorEmail(email);
-            if (usuario != null) {
-                return ResponseEntity.ok(usuario);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            logger.error("Error al obtener usuario por email {}: {}", email, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 }

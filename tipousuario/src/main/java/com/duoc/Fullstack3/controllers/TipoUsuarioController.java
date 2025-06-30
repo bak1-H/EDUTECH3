@@ -13,7 +13,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tipos-usuario")
-@Tag(name = "Tipos de Usuario", description = "Operaciones GET para consultar tipos de usuario")
+@Tag(name = "Tipos de Usuario", 
+description = "Operaciones GET para consultar tipos de usuario")
 public class TipoUsuarioController {
 
     @Autowired
