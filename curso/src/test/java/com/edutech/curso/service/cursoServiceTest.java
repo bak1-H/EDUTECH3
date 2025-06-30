@@ -174,12 +174,10 @@ class CursoServiceTest {
 
     @Test
     void testEliminarCurso() {
-        //esta linea simula el comportamiento del repositorio
-        // cuando se elimina un curso por ID
-        when(cursoRepository.existsById(1L)).thenReturn(true);
-        // Verifica que el curso existe antes de eliminarlo
-        doNothing().when(cursoRepository).deleteById(1L);
 
+        //Esta liena simula el comportamiento del repositorio
+        // cuando se elimina un curso por ID
+        doNothing().when(cursoRepository).deleteById(1L);
         // esta linea llama al método del servicio
         // que elimina el curso por ID
         cursoService.eliminarCurso(1L);
