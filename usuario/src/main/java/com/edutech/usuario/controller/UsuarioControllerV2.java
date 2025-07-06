@@ -1,7 +1,6 @@
 package com.edutech.usuario.controller;
 
 import com.edutech.usuario.model.Usuario;
-import com.edutech.usuario.model.UsuarioRequest;
 import com.edutech.usuario.service.UsuarioService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,7 +82,6 @@ public class UsuarioControllerV2 {
         
         usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).obtenerPorRut(rutString)).withSelfRel());
         usuarioModel.add(linkTo(methodOn(UsuarioControllerV2.class).obtenerTodos()).withRel("usuarios"));
-        
         return usuarioModel;
     }
 }

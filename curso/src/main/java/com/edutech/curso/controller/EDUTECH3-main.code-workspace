@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "EDUTECH3-main",
+			"path": "../../../../../../../.."
+		}
+	],
+	"settings": {
+		"java.compile.nullAnalysis.mode": "automatic",
+		"java.debug.settings.onBuildFailureProceed": true,
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}

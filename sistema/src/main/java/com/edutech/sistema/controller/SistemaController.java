@@ -52,8 +52,11 @@ public class SistemaController {
     }
 
     // ENDPOINTS DE CURSOS
-    @Operation(summary = "Obtener todos los cursos enriquecidos", description = "Devuelve una lista de todos los cursos con información de usuarios inscritos.")
+    @Operation(summary = "Obtener todos los cursos enriquecidos",
+     description = "Devuelve una lista de todos los cursos con información de usuarios inscritos.")
+
     @ApiResponse(responseCode = "200", description = "Lista de cursos enriquecidos obtenida correctamente")
+    
     @GetMapping("cursos")
     public List<CursoEnriquecido> getAllCursos() {
         List<Curso> cursos = cursoService.obtenerTodosLosCursos();
