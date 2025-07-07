@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 //CursoEnriquecido es un DTO (Data Transfer Object) que se utiliza para enviar
@@ -22,6 +23,7 @@ public class CursoEnriquecido {
     
     // Datos enriquecidos
     private List<Usuario> usuariosInscritos;
+    @JsonIgnore
     private List<PagoEnriquecido> pagosRelacionados;
     private int totalInscritos;
 }

@@ -1,10 +1,12 @@
 package com.edutech.sistema.controller;
 
+import com.edutech.sistema.model.enriquecimiento.*;
 import com.edutech.sistema.model.Pago;
 import com.edutech.sistema.model.Curso;
 import com.edutech.sistema.model.Usuario;
 import com.edutech.sistema.service.PagoService;
 import com.edutech.sistema.service.CursoService;
+import com.edutech.sistema.service.EnriquecimientoService;
 import com.edutech.sistema.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
@@ -43,6 +45,8 @@ public class SistemaControllerV2 {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private EnriquecimientoService enriquecimientoService;
     // ========== ENDPOINTS DE PAGOS ==========
 
     @Operation(summary = "Obtener todos los pagos con HATEOAS")
@@ -105,70 +109,74 @@ public class SistemaControllerV2 {
 
     // ========== ENDPOINTS DE CURSOS ==========
 
-    @Operation(summary = "Obtener todos los cursos con HATEOAS")
-    @GetMapping("/cursos")
-    public ResponseEntity<CollectionModel<EntityModel<Curso>>> obtenerTodosCursos() {
-        try {
-            List<Curso> cursos = cursoService.obtenerTodosLosCursos();
-            
-            // Validar que la lista no sea null
-            if (cursos == null) {
-                logger.warn("Lista de cursos es null, devolviendo lista vacía");
-                cursos = List.of();
-            }
-            
-            List<EntityModel<Curso>> cursosModel = cursos.stream()
-                .filter(curso -> curso != null) // Filtrar cursos null
-                .map(this::agregarLinksCurso)
-                .collect(Collectors.toList());
-
-            CollectionModel<EntityModel<Curso>> collection = CollectionModel.of(cursosModel);
-            collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosCursos()).withSelfRel());
-            collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosPagos()).withRel("pagos"));
-            collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosUsuarios()).withRel("usuarios"));
-            
-            logger.info("Obtenidos {} cursos con HATEOAS", cursosModel.size());
-            return ResponseEntity.ok(collection);
-            
-        } catch (Exception e) {
-            logger.error("Error al obtener todos los cursos: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+@Operation(summary = "Obtener todos los cursos enriquecidos con usuarios con HATEOAS")
+@GetMapping("/cursos")
+public ResponseEntity<CollectionModel<EntityModel<CursoEnriquecido>>> obtenerTodosCursos() {
+    try {
+        List<Curso> cursos = cursoService.obtenerTodosLosCursos();
+        
+        // Validar que la lista no sea null
+        if (cursos == null) {
+            logger.warn("Lista de cursos es null, devolviendo lista vacía");
+            cursos = List.of();
         }
+        
+        // Enriquecer cursos con usuarios
+        List<EntityModel<CursoEnriquecido>> cursosModel = cursos.stream()
+            .filter(curso -> curso != null) // Filtrar cursos null
+            .map(curso -> enriquecimientoService.enriquecerCurso(curso)) // Enriquecer con usuarios
+            .map(this::agregarLinksCursoEnriquecido) // Usar método específico para curso enriquecido
+            .collect(Collectors.toList());
+
+        CollectionModel<EntityModel<CursoEnriquecido>> collection = CollectionModel.of(cursosModel);
+        collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosCursos()).withSelfRel());
+        collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosUsuarios()).withRel("usuarios"));
+        
+        logger.info("Obtenidos {} cursos enriquecidos con HATEOAS", cursosModel.size());
+        return ResponseEntity.ok(collection);
+        
+    } catch (Exception e) {
+        logger.error("Error al obtener todos los cursos enriquecidos: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+}
 
 
-    @Operation(summary = "Obtener curso por ID con HATEOAS")
-    @GetMapping("/cursos/{id}")
-    public ResponseEntity<EntityModel<Curso>> obtenerCursoPorId(@PathVariable Long id) {
-        try {
-            // Validar ID
-            if (id == null || id <= 0) {
-                logger.warn("ID inválido recibido: {}", id);
-                return ResponseEntity.badRequest().build();
-            }
-
-            Curso curso = cursoService.obtenerCursoPorId(id);
-            if (curso != null) {
-                EntityModel<Curso> cursoModel = agregarLinksCurso(curso);
-                logger.info("Curso encontrado: ID {}", id);
-                return ResponseEntity.ok(cursoModel);
-            } else {
-                logger.warn("Curso no encontrado con ID: {}", id);
-                return ResponseEntity.notFound().build();
-            }
-            
-        } catch (Exception e) {
-            logger.error("Error al obtener curso por ID {}: {}", id, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+@Operation(summary = "Obtener curso enriquecido por ID con HATEOAS")
+@GetMapping("/cursos/{id}")
+public ResponseEntity<EntityModel<CursoEnriquecido>> obtenerCursoPorId(@PathVariable Long id) {
+    try {
+        // Validar ID
+        if (id == null || id <= 0) {
+            logger.warn("ID de curso inválido: {}", id);
+            return ResponseEntity.badRequest().build();
         }
+
+        Curso curso = cursoService.obtenerCursoPorId(id);
+        if (curso != null) {
+            // Enriquecer el curso con usuarios
+            CursoEnriquecido cursoEnriquecido = enriquecimientoService.enriquecerCurso(curso);
+            EntityModel<CursoEnriquecido> cursoModel = agregarLinksCursoEnriquecido(cursoEnriquecido);
+            logger.info("Curso enriquecido encontrado: ID {}", id);
+            return ResponseEntity.ok(cursoModel);
+        } else {
+            logger.warn("Curso no encontrado con ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        
+    } catch (Exception e) {
+        logger.error("Error al obtener curso enriquecido por ID {}: {}", id, e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+}
 
     // ========== ENDPOINTS DE USUARIOS ==========
 
     @Operation(summary = "Obtener todos los usuarios con HATEOAS")
     @GetMapping("/usuarios")
-    public ResponseEntity<CollectionModel<EntityModel<Usuario>>> obtenerTodosUsuarios() {
+    public ResponseEntity<CollectionModel<EntityModel<UsuarioEnriquecido>>> obtenerTodosUsuarios() {
         try {
+            // Cambia 'obtenerTodosUsuarios' por 'findAll' o el método correcto de tu servicio
             List<Usuario> usuarios = usuarioService.obtenerTodosLosUsuarios();
             
             // Validar que la lista no sea null
@@ -177,17 +185,18 @@ public class SistemaControllerV2 {
                 usuarios = List.of();
             }
             
-            List<EntityModel<Usuario>> usuariosModel = usuarios.stream()
+            List<EntityModel<UsuarioEnriquecido>> usuariosModel = usuarios.stream()
                 .filter(usuario -> usuario != null) // Filtrar usuarios null
-                .map(this::agregarLinksUsuario)
+                .map(usuario -> enriquecimientoService.enriquecerUsuario(usuario))
+                .map(this::agregarLinksUsuarioEnriquecido)
                 .collect(Collectors.toList());
 
-            CollectionModel<EntityModel<Usuario>> collection = CollectionModel.of(usuariosModel);
+            CollectionModel<EntityModel<UsuarioEnriquecido>> collection = CollectionModel.of(usuariosModel);
             collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosUsuarios()).withSelfRel());
             collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosPagos()).withRel("pagos"));
             collection.add(linkTo(methodOn(SistemaControllerV2.class).obtenerTodosCursos()).withRel("cursos"));
             
-            logger.info("Obtenidos {} usuarios con HATEOAS", usuariosModel.size());
+            logger.info("Obtenidos {} usuarios enriquecidos con HATEOAS", usuariosModel.size());
             return ResponseEntity.ok(collection);
             
         } catch (Exception e) {
@@ -195,6 +204,7 @@ public class SistemaControllerV2 {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
 
     @Operation(summary = "Obtener usuario por RUT con HATEOAS")
@@ -330,4 +340,70 @@ public class SistemaControllerV2 {
 
         return usuarioModel;
     }
+
+
+    // Método privado para agregar enlaces HATEOAS a UsuarioEnriquecido
+    private EntityModel<UsuarioEnriquecido> agregarLinksUsuarioEnriquecido(UsuarioEnriquecido usuarioEnriquecido) {
+        EntityModel<UsuarioEnriquecido> usuarioModel = EntityModel.of(usuarioEnriquecido);
+        try {
+            if (usuarioEnriquecido.getRut() != null && !usuarioEnriquecido.getRut().trim().isEmpty()) {
+                usuarioModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                    .obtenerUsuarioPorRut(usuarioEnriquecido.getRut())).withSelfRel());
+            }
+            usuarioModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                .obtenerTodosUsuarios()).withRel("usuarios"));
+            usuarioModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                .obtenerTodosPagos()).withRel("pagos"));
+            usuarioModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                .obtenerTodosCursos()).withRel("cursos"));
+        } catch (Exception e) {
+            logger.error("Error creando links HATEOAS para usuario enriquecido {}: {}", 
+                        usuarioEnriquecido.getRut(), e.getMessage());
+        }
+        return usuarioModel;
+    }
+
+
+    //Agregar enlaces HATEOAS a Curso Enriquecido
+    // Este método agrega enlaces HATEOAS a un objeto CursoEnriquecido, incluyendo enlaces a sí mismo,
+    // a la colección completa de cursos, y a los recursos relacionados como usuarios y pagos.
+
+private EntityModel<CursoEnriquecido> agregarLinksCursoEnriquecido(CursoEnriquecido curso) {
+    EntityModel<CursoEnriquecido> cursoModel = EntityModel.of(curso);
+    
+    try {
+        // Validar que el curso tenga ID válido
+        if (curso.getId() != null && curso.getId() > 0) {
+            // Link a sí mismo (self)
+            cursoModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                .obtenerCursoPorId(curso.getId())).withSelfRel());
+        }
+        
+        // Link a la colección completa
+        cursoModel.add(linkTo(methodOn(SistemaControllerV2.class)
+            .obtenerTodosCursos()).withRel("cursos"));
+        
+        // Links de navegación
+        cursoModel.add(linkTo(methodOn(SistemaControllerV2.class)
+            .obtenerTodosPagos()).withRel("pagos"));
+        cursoModel.add(linkTo(methodOn(SistemaControllerV2.class)
+            .obtenerTodosUsuarios()).withRel("usuarios"));
+        
+        // Links a usuarios específicos si existen
+        if (curso.getUsuariosInscritos() != null && !curso.getUsuariosInscritos().isEmpty()) {
+            for (Usuario usuario : curso.getUsuariosInscritos()) {
+                if (usuario.getRut() != null && !usuario.getRut().trim().isEmpty()) {
+                    cursoModel.add(linkTo(methodOn(SistemaControllerV2.class)
+                        .obtenerUsuarioPorRut(usuario.getRut())).withRel("usuario-" + usuario.getRut()));
+                }
+            }
+        }
+        
+    } catch (Exception e) {
+        logger.error("Error creando links HATEOAS para curso enriquecido {}: {}", 
+                    curso.getId(), e.getMessage());
+    }
+
+    return cursoModel;
+}
 }
